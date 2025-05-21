@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "amazon.lambda.testtool-8.0": {
+      "version": "0.16.2",
+      "commands": [
+        "dotnet-lambda-test-tool-8.0"
+      ],
+      "rollForward": false
+    },
+    "amazon.lambda.tools": {
+      "version": "5.12.4",
+      "commands": [
+        "dotnet-lambda"
+      ],
+      "rollForward": false
+    },
+    "dotnet-ef": {
+      "version": "8.0.16",
+      "commands": [
+        "dotnet-ef"
+      ],
+      "rollForward": false
+    }
+  }
+}
