@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api_LuanVan.Models;
+using api_LuanVan.DataTransferObject;
 
 namespace api_LuanVan.Controllers
 {
@@ -14,17 +15,23 @@ namespace api_LuanVan.Controllers
         {
             _context = context;
         }
-        
+
         // GET: api/Category
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<DTO_Category>>> GetAllCategories()
         {
-            return await _context.Categories.ToListAsync();
+            return await _context.Categories
+                .Select(c => new DTO_Category
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName
+                })
+                .ToListAsync();
         }
 
         // GET: api/Category/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<DTO_Category>> GetCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
 
@@ -33,48 +40,90 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             }
 
-            return category;
+            return new DTO_Category
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName
+            };
         }
 
         // POST: api/Category
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<DTO_Category>> PostCategory([FromBody] DTO_Category dto)
         {
+            var category = new Category
+            {
+                CategoryName = dto.CategoryName
+            };
+
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCategory), new { id = category.CategoryId }, category);
+            dto.CategoryId = category.CategoryId;
+
+            return CreatedAtAction(nameof(GetCategory), new { id = dto.CategoryId }, dto);
         }
 
         // PUT: api/Category/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<ActionResult<DTO_Category>> UpdateCategory(int id,[FromBody] DTO_Category dto)
         {
-            if (id != category.CategoryId)
+            if (id != dto.CategoryId)
             {
-                return BadRequest();
+                return BadRequest("ID in URL and Body do not match");
             }
-
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            category.CategoryName = dto.CategoryName;
             _context.Entry(category).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
-            try
+            return Ok(new DTO_Category
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName
+            });
         }
+
+
+
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutCategory(int id, DTO_Category dto)
+        //{
+        //    if (id != dto.CategoryId)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    var category = await _context.Categories.FindAsync(id);
+        //    if (category == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    category.CategoryName = dto.CategoryName;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!CategoryExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
 
         // DELETE: api/Category/5
         [HttpDelete("{id}")]
