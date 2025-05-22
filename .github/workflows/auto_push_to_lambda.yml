@@ -20,7 +20,9 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - run: dotnet tool install -g Amazon.Lambda.Tools
+       # this line is needed because the dotnet tool isn't installed in the .config file of this repo 
+      - name: Install dotnet tool
+        run: dotnet tool install -g Amazon.Lambda.Tools
 
       - name: Restore dependencies
         run: dotnet restore
@@ -30,6 +32,7 @@ jobs:
         run: dotnet build --configuration Release
         working-directory: ./api_luanVan
 
+       # Reload dotnet tools from .config file
       - name: Restore dotnet tools
         run: dotnet tool restore
         working-directory: ./api_luanVan
