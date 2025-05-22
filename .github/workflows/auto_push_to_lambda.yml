@@ -29,6 +29,10 @@ jobs:
       - name: Build project
         run: dotnet build --configuration Release
         working-directory: ./api_luanVan
+        
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+        working-directory: ./api_luanVan
 
       - name: Package Lambda
         run: dotnet lambda package --configuration Release --output-package ../../lambda.zip
