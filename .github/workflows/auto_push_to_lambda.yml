@@ -44,7 +44,9 @@ jobs:
           role-to-assume: arn:aws:iam::730335485777:role/role-for-OIDC-to-access-from-githubAction
           aws-region: ap-southeast-1
 
-      - run: |
+      - name: Deploy to Lambda
+        run: |
           aws lambda update-function-code \
             --function-name luanvantotnghiep-AspNetCoreFunction-oK6W6kMIhTKn \
-            --zip-file fileb://lambda.zip
+            --zip-file fileb://api_luanVan/lambda.zip
+
