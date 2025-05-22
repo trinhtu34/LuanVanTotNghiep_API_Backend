@@ -29,14 +29,17 @@ jobs:
       - name: Build project
         run: dotnet build --configuration Release
         working-directory: ./api_luanVan
-        
+
       - name: Restore dotnet tools
         run: dotnet tool restore
         working-directory: ./api_luanVan
 
       - name: Package Lambda
-        run: dotnet lambda package --configuration Release --output-package ../../lambda.zip
+        run: dotnet lambda package --configuration Release --output-package lambda.zip
         working-directory: ./api_luanVan
+
+      - name: Move ZIP to root
+        run: mv ./api_luanVan/lambda.zip .
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v2
@@ -48,5 +51,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name luanvantotnghiep-AspNetCoreFunction-oK6W6kMIhTKn \
-            --zip-file fileb://api_luanVan/lambda.zip
-
+            --zip-file fileb://lambda.zip
