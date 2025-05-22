@@ -24,15 +24,15 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: ./api_LuanVan
+        working-directory: ./api_luanVan
 
-      - name: Build the project
+      - name: Build project
         run: dotnet build --configuration Release
-        working-directory: ./api_LuanVan
+        working-directory: ./api_luanVan
 
-      - name: Package Lambda project
-        run: dotnet lambda package --configuration Release --output-package ../lambda.zip
-        working-directory: ./api_LuanVan
+      - name: Package Lambda
+        run: dotnet lambda package --configuration Release --output-package ../../lambda.zip
+        working-directory: ./api_luanVan
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v2
