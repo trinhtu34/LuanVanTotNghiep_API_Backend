@@ -71,7 +71,8 @@ namespace api_LuanVan.Controllers
             _context.Menus.Add(menu);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetMenu), new { id = menu.DishId }, dto);
+            return CreatedAtAction(nameof(GetMenu), new { id = menu.DishId }, menu);
+            //return Ok();
         }
 
         // PUT: api/Menu/{id}
