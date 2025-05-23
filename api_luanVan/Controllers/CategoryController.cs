@@ -88,58 +88,21 @@ namespace api_LuanVan.Controllers
             });
         }
 
-
-
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutCategory(int id, DTO_Category dto)
+        //// DELETE: api/Category/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteCategory(int id)
         //{
-        //    if (id != dto.CategoryId)
-        //    {
-        //        return BadRequest();
-        //    }
-
         //    var category = await _context.Categories.FindAsync(id);
         //    if (category == null)
         //    {
         //        return NotFound();
         //    }
 
-        //    category.CategoryName = dto.CategoryName;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CategoryExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+        //    _context.Categories.Remove(category);
+        //    await _context.SaveChangesAsync();
 
         //    return NoContent();
         //}
-
-        // DELETE: api/Category/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
         private bool CategoryExists(int id)
         {

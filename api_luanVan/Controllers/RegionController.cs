@@ -138,19 +138,19 @@ namespace api_LuanVan.Controllers
             });
         }
 
-        // DELETE: api/Region/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRegion(int id)
-        {
-            var region = await _context.Regions.FindAsync(id);
-            if (region == null)
-                return NotFound();
+        //// DELETE: api/Region/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteRegion(int id)
+        //{
+        //    var region = await _context.Regions.FindAsync(id);
+        //    if (region == null)
+        //        return NotFound();
 
-            _context.Regions.Remove(region);
-            await _context.SaveChangesAsync();
+        //    _context.Regions.Remove(region);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         //// GET: api/Region/search?name=North
         //[HttpGet("search")]
