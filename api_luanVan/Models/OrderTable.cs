@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace api_LuanVan.Models;
 
@@ -10,6 +11,8 @@ public partial class OrderTable
     public string? UserId { get; set; }
 
     public DateTime StartingTime { get; set; }
+
+    public bool isCancel { get; set; }
 
     public decimal? TotalPrice { get; set; }
 
