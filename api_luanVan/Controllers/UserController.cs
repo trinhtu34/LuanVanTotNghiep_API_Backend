@@ -53,19 +53,19 @@ namespace api_LuanVan.Controllers
                 return Unauthorized("UserId or UPassword is invalid.");
             }
 
-            //// Tạo DTO để trả về (ẩn các quan hệ khác)
-            //var dtoUser = new DTO_User
-            //{
-            //    UserId = existingUser.UserId,
-            //    UPassword = null, // không trả về password!
-            //    CustomerName = existingUser.CustomerName,
-            //    RolesId = existingUser.RolesId,
-            //    PhoneNumber = existingUser.PhoneNumber,
-            //    Email = existingUser.Email,
-            //    Address = existingUser.Address,
-            //    CreateAt = existingUser.CreateAt
-            //};
-            return Ok();
+            // Tạo DTO để trả về (ẩn các quan hệ khác)
+            var dtoUser = new DTO_User
+            {
+                //UserId = existingUser.UserId,
+                //UPassword = null, // không trả về password!
+                //CustomerName = existingUser.CustomerName,
+                RolesId = existingUser.RolesId,
+                //PhoneNumber = existingUser.PhoneNumber,
+                //Email = existingUser.Email,
+                //Address = existingUser.Address,
+                //CreateAt = existingUser.CreateAt
+            };
+            return Ok(dtoUser);
         }
 
 
