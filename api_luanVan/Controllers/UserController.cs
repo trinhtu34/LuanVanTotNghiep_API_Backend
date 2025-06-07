@@ -53,7 +53,6 @@ namespace api_LuanVan.Controllers
                 return Unauthorized("UserId or UPassword is invalid.");
             }
 
-            // Tạo DTO để trả về (ẩn các quan hệ khác)
             var dtoUser = new DTO_User
             {
                 //UserId = existingUser.UserId,
