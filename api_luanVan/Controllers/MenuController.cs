@@ -16,7 +16,6 @@ namespace api_LuanVan.Controllers
             _context = context;
         }
 
-        // GET: api/Menu
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetAllMenus()
         {
@@ -34,7 +33,6 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Menu/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_Menu>> GetMenu(string id)
         {
@@ -54,7 +52,6 @@ namespace api_LuanVan.Controllers
             };
         }
 
-        // POST: api/Menu
         [HttpPost]
         public async Task<ActionResult<DTO_Menu>> CreateMenu([FromBody] DTO_Menu dto)
         {
@@ -75,7 +72,6 @@ namespace api_LuanVan.Controllers
             //return Ok();
         }
 
-        // PUT: api/Menu/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<DTO_Menu>> UpdateMenu(string id, [FromBody] DTO_Menu dto)
         {

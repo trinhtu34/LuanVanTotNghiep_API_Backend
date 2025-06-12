@@ -16,7 +16,6 @@ namespace api_LuanVan.Controllers
             _context = context;
         }
 
-        // GET: api/Category
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_Category>>> GetAllCategories()
         {
@@ -29,7 +28,6 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Category/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_Category>> GetCategory(int id)
         {
@@ -47,7 +45,6 @@ namespace api_LuanVan.Controllers
             };
         }
 
-        // POST: api/Category
         [HttpPost]
         public async Task<ActionResult<DTO_Category>> PostCategory([FromBody] DTO_Category dto)
         {
@@ -64,7 +61,6 @@ namespace api_LuanVan.Controllers
             return CreatedAtAction(nameof(GetCategory), new { id = dto.CategoryId }, dto);
         }
 
-        // PUT: api/Category/5
         [HttpPut("{id}")]
         public async Task<ActionResult<DTO_Category>> UpdateCategory(int id,[FromBody] DTO_Category dto)
         {
