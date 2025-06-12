@@ -18,8 +18,6 @@ namespace api_LuanVan.Controllers
             _context = context;
         }
 
-        // lấy tất cả theo dạng list 
-        // GET: api/Region
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_Region>>> GetAllRegions()
         {
@@ -32,8 +30,6 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
 
-        // lấy 1 region theo mã 
-        // GET: api/Region/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_Region>> GetRegion(int id)
         {
@@ -49,8 +45,6 @@ namespace api_LuanVan.Controllers
             };
         }
 
-        // thêm
-        // POST: api/Region
         [HttpPost]
         public async Task<ActionResult<DTO_Region>> CreateRegion([FromBody] DTO_Region regionDto)
         {
