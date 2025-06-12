@@ -87,12 +87,3 @@ namespace api_LuanVan.Controllers
         }
     }
 }
-public int TableId { get; set; }
-
-public int? Capacity { get; set; }
-
-public decimal? Deposit { get; set; }
-
-public string? Description { get; set; }
-
-public int RegionId { get; set; }
