@@ -30,10 +30,10 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
         [HttpGet("ordertable/{userid}")]
-        public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string UserId)
+        public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
             var orderTable = await _context.OrderTables
-                .Where(m => m.UserId == UserId)
+                .Where(m => m.UserId == userid)
                 .Select(m => new DTO_OrderTable
                 {
                     OrderTableId = m.OrderTableId,

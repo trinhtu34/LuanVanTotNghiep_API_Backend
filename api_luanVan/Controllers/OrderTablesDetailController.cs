@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using api_LuanVan.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api_LuanVan.Controllers
@@ -7,6 +8,11 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class OrderTablesDetailController : ControllerBase
     {
+        private readonly DbluanvantotnghiepContext _context;
+        public OrderTablesDetailController(DbluanvantotnghiepContext context)
+        {
+            _context = context;
+        }
 
     }
 }
