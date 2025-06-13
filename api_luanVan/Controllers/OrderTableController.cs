@@ -29,7 +29,7 @@ namespace api_LuanVan.Controllers
                     OrderDate = m.OrderDate
                 }).ToListAsync();
         }
-        [HttpGet("ordertable/{userid}")]
+        [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
             var orderTable = await _context.OrderTables
