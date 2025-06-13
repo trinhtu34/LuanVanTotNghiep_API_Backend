@@ -95,7 +95,7 @@ namespace api_LuanVan.Controllers
                 UserId = user.UserId,
                 UPassword = user.UPassword,
                 CustomerName = user.CustomerName,
-                RolesId = 1,
+                RolesId = 0,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
                 Address = user.Address,
