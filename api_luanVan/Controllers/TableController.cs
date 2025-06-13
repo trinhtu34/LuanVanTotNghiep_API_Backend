@@ -47,6 +47,23 @@ namespace api_LuanVan.Controllers
             };
         }
 
+        [HttpGet("region/{regionId}")]
+        public async Task<ActionResult<IEnumerable<DTO_Table>>> GetTablesByRegionId(int regionId)
+        {
+            var tables = await _context.Tables
+                .Where(t => t.RegionId == regionId)
+                .Select(t => new DTO_Table
+                {
+                    TableId = t.TableId,
+                    Capacity = t.Capacity,
+                    Deposit = t.Deposit,
+                    Description = t.Description,
+                    RegionId = t.RegionId
+                })
+                .ToListAsync();
+            return tables;
+        }
+
         [HttpPost]
         public async Task<ActionResult<DTO_Table>> CreateTable([FromBody] DTO_Table dto)
         {
