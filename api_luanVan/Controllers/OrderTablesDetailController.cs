@@ -29,19 +29,26 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DTO_OrderTablesDetail>> GetOrderTablesDetailById(int id)
+        [HttpGet("by-order/{orderTableId}")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTablesDetail>>> GetOrderTablesDetailsByOrderTableId(long orderTableId)
         {
-            var orderTableDetail = await _context.OrderTablesDetails.FindAsync(id);
-            if (orderTableDetail == null)
+            var orderTableDetails = await _context.OrderTablesDetails
+                .Where(o => o.OrderTableId == orderTableId)
+                .Select(o => new DTO_OrderTablesDetail
+                {
+                    OrderTablesDetailsId = o.OrderTablesDetailsId,
+                    OrderTableId = o.OrderTableId,
+                    TableId = o.TableId
+                })
+                .ToListAsync();
+
+            if (orderTableDetails == null || !orderTableDetails.Any())
                 return NotFound();
-            return new DTO_OrderTablesDetail
-            {
-                OrderTablesDetailsId = orderTableDetail.OrderTablesDetailsId,
-                OrderTableId = orderTableDetail.OrderTableId,
-                TableId = orderTableDetail.TableId
-            };
+
+            return orderTableDetails;
         }
+
+
 
         [HttpPost]
         public async Task<ActionResult<DTO_OrderTablesDetail>> CreateOrderTablesDetail([FromBody] DTO_OrderTablesDetail dto)
