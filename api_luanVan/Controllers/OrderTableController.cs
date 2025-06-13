@@ -37,7 +37,7 @@ namespace api_LuanVan.Controllers
                 .Select(m => new DTO_OrderTable
                 {
                     OrderTableId = m.OrderTableId,
-                    //UserId = m.UserId,
+                    UserId = m.UserId,
                     StartingTime = m.StartingTime,
                     isCancel = m.isCancel,
                     TotalPrice = m.TotalPrice,
