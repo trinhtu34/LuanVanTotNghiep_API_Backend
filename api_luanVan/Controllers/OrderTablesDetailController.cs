@@ -43,7 +43,7 @@ namespace api_LuanVan.Controllers
             };
         }
 
-        [HttpGet("{orderTableId}")]
+        [HttpGet("list/{orderTableId}")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTablesDetail>>> GetOrderTablesDetailsByOrderTableId(long orderTableId)
         {
             var orderTableDetails = await _context.OrderTablesDetails
