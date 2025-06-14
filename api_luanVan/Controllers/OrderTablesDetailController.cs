@@ -92,3 +92,7 @@ namespace api_LuanVan.Controllers
         }
     }
 }
+public class tbResposen
+{
+    public int TableId { get; set; }
+}
