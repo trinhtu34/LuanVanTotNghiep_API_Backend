@@ -1,0 +1,29 @@
+﻿namespace api_LuanVan.DataTransferObject
+{
+    public class DTO_Payment
+    {
+        public long PaymentResultId { get; set; }
+
+        public long OrderTableId { get; set; }
+
+        public long PaymentId { get; set; }
+
+        public bool IsSuccess { get; set; }
+
+        public string? Description { get; set; }
+
+        public DateTime Timestamp { get; set; }
+
+        public long? VnpayTransactionId { get; set; }
+
+        public string? PaymentMethod { get; set; }
+
+        public string? BankCode { get; set; }
+
+        public string? BankTransactionId { get; set; }
+
+        public string? ResponseDescription { get; set; }
+
+        public string? TransactionStatusDescription { get; set; }
+    }
+}
