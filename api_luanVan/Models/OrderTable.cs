@@ -15,6 +15,7 @@ public partial class OrderTable
     public bool isCancel { get; set; }
 
     public decimal? TotalPrice { get; set; }
+    public decimal? TotalDeposit { get; set; }
 
     public DateTime OrderDate { get; set; }
 

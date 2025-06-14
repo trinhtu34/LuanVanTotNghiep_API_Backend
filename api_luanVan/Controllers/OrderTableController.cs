@@ -26,6 +26,7 @@ namespace api_LuanVan.Controllers
                     StartingTime = m.StartingTime,
                     isCancel = m.isCancel,
                     TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
                 }).ToListAsync();
         }
@@ -41,6 +42,7 @@ namespace api_LuanVan.Controllers
                     StartingTime = m.StartingTime,
                     isCancel = m.isCancel,
                     TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
                 }).ToListAsync();
             if (orderTable == null || orderTable.Count == 0)
@@ -57,6 +59,7 @@ namespace api_LuanVan.Controllers
                 StartingTime = dto.StartingTime,
                 isCancel = dto.isCancel,
                 TotalPrice = dto.TotalPrice,
+                TotalDeposit = dto.TotalDeposit,
                 OrderDate = DateTime.Now
             };
             _context.OrderTables.Add(orderTable);
@@ -79,6 +82,7 @@ namespace api_LuanVan.Controllers
             orderTable.StartingTime = dto.StartingTime;
             orderTable.isCancel = dto.isCancel;
             orderTable.TotalPrice = dto.TotalPrice;
+            orderTable.TotalDeposit = dto.TotalDeposit;
             _context.Entry(orderTable).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
