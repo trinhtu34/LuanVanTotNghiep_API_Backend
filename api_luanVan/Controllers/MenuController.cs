@@ -32,7 +32,46 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
         }
-
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetMenusByCategoryId(int categoryId)
+        {
+            var menus = await _context.Menus
+                .Where(m => m.CategoryId == categoryId)
+                .Select(m => new DTO_Menu
+                {
+                    DishId = m.DishId,
+                    DishName = m.DishName,
+                    Price = m.Price,
+                    Descriptions = m.Descriptions,
+                    CategoryId = m.CategoryId,
+                    RegionId = m.RegionId,
+                    Images = m.Images
+                })
+                .ToListAsync();
+            if (menus == null || !menus.Any())
+                return NotFound();
+            return menus;
+        }
+        [HttpGet("region/{regionId}")]
+        public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetMenusByRegionId(int regionId)
+        {
+            var menus = await _context.Menus
+                .Where(m => m.RegionId == regionId)
+                .Select(m => new DTO_Menu
+                {
+                    DishId = m.DishId,
+                    DishName = m.DishName,
+                    Price = m.Price,
+                    Descriptions = m.Descriptions,
+                    CategoryId = m.CategoryId,
+                    RegionId = m.RegionId,
+                    Images = m.Images
+                })
+                .ToListAsync();
+            if (menus == null || !menus.Any())
+                return NotFound();
+            return menus;
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_Menu>> GetMenu(string id)
         {
