@@ -23,7 +23,6 @@ namespace api_LuanVan.Controllers
             return await _context.PaymentResults
                 .Select(pr => new DTO_Payment
                 {
-                    PaymentResultId = pr.PaymentResultId,
                     OrderTableId = pr.OrderTableId,
                     PaymentId = pr.PaymentId,
                     IsSuccess = pr.IsSuccess,
@@ -59,9 +58,25 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
             if (paymentResults == null || !paymentResults.Any())
                 return NotFound();
+
             return paymentResults;
         }
+        [HttpGet("ordertable/status/{id}")]
+        public async Task<ActionResult<IEnumerable<DTO_PaymentStatus>>> GetPaymentStatusByOrderTableId(long id)
+        {
+            var paymentStatuses = await _context.PaymentResults
+                .Where(pr => pr.OrderTableId == id)
+                .Select(pr => new DTO_PaymentStatus
+                {
+                    OrderTableId = pr.OrderTableId,
+                    IsSuccess = pr.IsSuccess
+                }).ToListAsync();
 
+            if (paymentStatuses == null || !paymentStatuses.Any())
+                return NotFound();
+
+            return paymentStatuses;
+        }
         [HttpPost]
         public async Task<ActionResult<DTO_Payment>> CreatePaymentResult(DTO_Payment paymentDto)
         {
