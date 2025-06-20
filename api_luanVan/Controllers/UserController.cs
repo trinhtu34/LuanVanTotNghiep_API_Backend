@@ -121,6 +121,28 @@ namespace api_LuanVan.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
         }
 
+        [HttpPost("guestuser")]
+        public async Task<ActionResult<DTO_User>> CreateGuestUser([FromBody] DTO_User user)
+        {
+            if (user == null)
+                return BadRequest("User data is null.");
+            if (string.IsNullOrEmpty(user.UserId))
+            {
+                return BadRequest("UserId");
+            }
+            if (await _context.Users.AnyAsync(u => u.UserId == user.UserId))
+                return Conflict("UserId already exists.");
+            var newUser = new User
+            {
+                UserId = user.UserId,
+                RolesId = 0, // Guest role
+                CreateAt = DateTime.Now
+            };
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+            //return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
+            return Ok();
+        }
 
         [HttpPut("modify/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] DTO_UpdateUser user)
