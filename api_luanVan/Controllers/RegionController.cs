@@ -11,9 +11,9 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class RegionController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
+        private readonly Dbluanvan2Context _context;
 
-        public RegionController(DbluanvantotnghiepContext context)
+        public RegionController(Dbluanvan2Context context)
         {
             _context = context;
         }

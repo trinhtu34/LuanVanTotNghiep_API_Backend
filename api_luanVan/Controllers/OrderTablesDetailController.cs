@@ -10,8 +10,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class OrderTablesDetailController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public OrderTablesDetailController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public OrderTablesDetailController(Dbluanvan2Context context)
         {
             _context = context;
         }

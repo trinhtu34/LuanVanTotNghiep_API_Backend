@@ -11,8 +11,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public PaymentController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public PaymentController(Dbluanvan2Context context)
         {
             _context = context;
         }
@@ -24,7 +24,9 @@ namespace api_LuanVan.Controllers
                 .Select(pr => new DTO_Payment
                 {
                     OrderTableId = pr.OrderTableId,
+                    CartId = pr.CartId,
                     PaymentId = pr.PaymentId,
+                    Amount = pr.Amount,
                     IsSuccess = pr.IsSuccess,
                     Description = pr.Description,
                     Timestamp = pr.Timestamp,
@@ -45,6 +47,8 @@ namespace api_LuanVan.Controllers
                 {
                     PaymentResultId = pr.PaymentResultId,
                     OrderTableId = pr.OrderTableId,
+                    CartId = pr.CartId,
+                    Amount = pr.Amount,
                     PaymentId = pr.PaymentId,
                     IsSuccess = pr.IsSuccess,
                     Description = pr.Description,
@@ -83,7 +87,9 @@ namespace api_LuanVan.Controllers
             var paymentResult = new PaymentResult
             {
                 OrderTableId = paymentDto.OrderTableId,
+                CartId = paymentDto.CartId,
                 PaymentId = paymentDto.PaymentId,
+                Amount = paymentDto.Amount,
                 IsSuccess = paymentDto.IsSuccess,
                 Description = paymentDto.Description,
                 Timestamp = paymentDto.Timestamp,
@@ -98,5 +104,8 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetPaymentResultsByOrderTableId), new { id = paymentResult.OrderTableId }, paymentDto);
         }
+
+        //[HttpPut("ordertable/{id}")]
+        //[HttpPut("cart/{id}")]
     }
 }

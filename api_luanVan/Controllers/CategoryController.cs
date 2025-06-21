@@ -9,9 +9,9 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
+        private readonly Dbluanvan2Context _context;
 
-        public CategoryController(DbluanvantotnghiepContext context)
+        public CategoryController(Dbluanvan2Context context)
         {
             _context = context;
         }

@@ -9,8 +9,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class ContactFormController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public ContactFormController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public ContactFormController(Dbluanvan2Context context)
         {
             _context = context;
         }

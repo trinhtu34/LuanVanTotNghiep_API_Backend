@@ -10,8 +10,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class TableController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public TableController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public TableController(Dbluanvan2Context context)
         {
             _context = context;
         }

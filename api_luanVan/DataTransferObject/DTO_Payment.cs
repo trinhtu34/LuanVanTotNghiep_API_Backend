@@ -4,9 +4,12 @@
     {
         public long PaymentResultId { get; set; }
 
-        public long OrderTableId { get; set; }
+        public long? OrderTableId { get; set; }
 
-        public long PaymentId { get; set; }
+        public long? CartId { get; set; }
+
+        public long? PaymentId { get; set; }
+        public decimal? Amount { get; set; }
 
         public bool IsSuccess { get; set; }
 
