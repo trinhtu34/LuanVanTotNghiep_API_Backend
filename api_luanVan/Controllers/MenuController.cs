@@ -9,9 +9,9 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class MenuController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
+        private readonly Dbluanvan2Context _context;
 
-        public MenuController(DbluanvantotnghiepContext context)
+        public MenuController(Dbluanvan2Context context)
         {
             _context = context;
         }

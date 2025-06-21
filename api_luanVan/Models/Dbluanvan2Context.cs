@@ -1,31 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using api_LuanVan.Models;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
+using System;
+using System.Collections.Generic;
 
 namespace api_LuanVan.Models;
 
-public partial class DbluanvantotnghiepContext : DbContext
+public partial class Dbluanvan2Context : DbContext
 {
-    public DbluanvantotnghiepContext()
+    public Dbluanvan2Context()
     {
     }
 
-    public DbluanvantotnghiepContext(DbContextOptions<DbluanvantotnghiepContext> options)
+    public Dbluanvan2Context(DbContextOptions<Dbluanvan2Context> options)
         : base(options)
     {
     }
 
+    public virtual DbSet<Cart> Carts { get; set; }
+
+    public virtual DbSet<CartDetail> CartDetails { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<ContactForm> ContactForms { get; set; }
-
-    public virtual DbSet<GuestOrderFood> GuestOrderFoods { get; set; }
-
-    public virtual DbSet<GuestOrderFoodDetail> GuestOrderFoodDetails { get; set; }
-
-    public virtual DbSet<GuestUser> GuestUsers { get; set; }
 
     public virtual DbSet<Menu> Menus { get; set; }
 
@@ -45,9 +43,9 @@ public partial class DbluanvantotnghiepContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseMySql("server=database-1.cbqiyiaaa98a.ap-southeast-1.rds.amazonaws.com;database=dbluanvantotnghiep;user id=admin;password=tuhoami9998", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    //        => optionsBuilder.UseMySql("server=database-1.cbqiyiaaa98a.ap-southeast-1.rds.amazonaws.com;database=dbluanvan2;user id=admin;password=tuhoami9998", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -59,21 +57,80 @@ public partial class DbluanvantotnghiepContext : DbContext
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 39)));
+            optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 40)));
         }
     }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .UseCollation("utf8mb4_unicode_ci")
+            .UseCollation("utf8mb4_0900_ai_ci")
             .HasCharSet("utf8mb4");
+
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.CartId).HasName("PRIMARY");
+
+            entity
+                .ToTable("Cart")
+                .UseCollation("utf8mb4_unicode_ci");
+
+            entity.HasIndex(e => e.UserId, "fk_cart_user");
+
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
+            entity.Property(e => e.OrderTime)
+                .HasColumnType("datetime")
+                .HasColumnName("order_time");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(20)
+                .HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_cart_user");
+        });
+
+        modelBuilder.Entity<CartDetail>(entity =>
+        {
+            entity.HasKey(e => e.CartDetailsId).HasName("PRIMARY");
+
+            entity
+                .ToTable("cart_details")
+                .UseCollation("utf8mb4_unicode_ci");
+
+            entity.HasIndex(e => e.DishId, "fk_cart_details_menu");
+
+            entity.HasIndex(e => e.CartId, "fk_cart_details_order");
+
+            entity.Property(e => e.CartDetailsId).HasColumnName("cart_details_id");
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
+            entity.Property(e => e.DishId)
+                .HasMaxLength(5)
+                .HasColumnName("dish_id");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.Quantity)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("quantity");
+
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartDetails)
+                .HasForeignKey(d => d.CartId)
+                .HasConstraintName("fk_cart_details_order");
+
+            entity.HasOne(d => d.Dish).WithMany(p => p.CartDetails)
+                .HasForeignKey(d => d.DishId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_cart_details_menu");
+        });
 
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PRIMARY");
 
-            entity.ToTable("category");
+            entity
+                .ToTable("category")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CategoryName)
@@ -86,7 +143,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.ContactId).HasName("PRIMARY");
 
-            entity.ToTable("contact_form");
+            entity
+                .ToTable("contact_form")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.UserId, "fk_contact_form_user");
 
@@ -108,75 +167,13 @@ public partial class DbluanvantotnghiepContext : DbContext
                 .HasConstraintName("fk_contact_form_user");
         });
 
-        modelBuilder.Entity<GuestOrderFood>(entity =>
-        {
-            entity.HasKey(e => e.GuestOrderFoodId).HasName("PRIMARY");
-
-            entity.ToTable("GuestOrderFood");
-
-            entity.HasIndex(e => e.GuestId, "fk_GuestOrderFood_guest");
-
-            entity.Property(e => e.GuestOrderFoodId).HasColumnName("guestOrderFood_id");
-            entity.Property(e => e.GuestId).HasColumnName("guest_id");
-            entity.Property(e => e.OrderTime)
-                .HasColumnType("datetime")
-                .HasColumnName("order_time");
-
-            entity.HasOne(d => d.Guest).WithMany(p => p.GuestOrderFoods)
-                .HasForeignKey(d => d.GuestId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_GuestOrderFood_guest");
-        });
-
-        modelBuilder.Entity<GuestOrderFoodDetail>(entity =>
-        {
-            entity.HasKey(e => e.GuestOrderFoodDetailsId).HasName("PRIMARY");
-
-            entity.HasIndex(e => e.DishId, "fk_GuestOrderFoodDetails_menu");
-
-            entity.HasIndex(e => e.GuestOrderFoodId, "fk_GuestOrderFoodDetails_order");
-
-            entity.Property(e => e.GuestOrderFoodDetailsId).HasColumnName("guestOrderFoodDetails_id");
-            entity.Property(e => e.DishId)
-                .HasMaxLength(5)
-                .HasColumnName("dish_id");
-            entity.Property(e => e.GuestOrderFoodId).HasColumnName("guestOrderFood_id");
-            entity.Property(e => e.Price)
-                .HasPrecision(10, 2)
-                .HasColumnName("price");
-            entity.Property(e => e.Quantity)
-                .HasDefaultValueSql("'0'")
-                .HasColumnName("quantity");
-
-            entity.HasOne(d => d.Dish).WithMany(p => p.GuestOrderFoodDetails)
-                .HasForeignKey(d => d.DishId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_GuestOrderFoodDetails_menu");
-
-            entity.HasOne(d => d.GuestOrderFood).WithMany(p => p.GuestOrderFoodDetails)
-                .HasForeignKey(d => d.GuestOrderFoodId)
-                .HasConstraintName("fk_GuestOrderFoodDetails_order");
-        });
-
-        modelBuilder.Entity<GuestUser>(entity =>
-        {
-            entity.HasKey(e => e.GuestId).HasName("PRIMARY");
-
-            entity.ToTable("guest_user");
-
-            entity.Property(e => e.GuestId).HasColumnName("guest_id");
-            entity.Property(e => e.GuestName)
-                .HasMaxLength(50)
-                .HasColumnName("guest_name")
-                .UseCollation("utf8mb4_0900_ai_ci");
-            entity.Property(e => e.PhoneNumber).HasMaxLength(15);
-        });
-
         modelBuilder.Entity<Menu>(entity =>
         {
             entity.HasKey(e => e.DishId).HasName("PRIMARY");
 
-            entity.ToTable("menu");
+            entity
+                .ToTable("menu")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.CategoryId, "fk_menu_category");
 
@@ -215,7 +212,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.OrderFoodDetailsId).HasName("PRIMARY");
 
-            entity.ToTable("orderFoodDetails");
+            entity
+                .ToTable("orderFoodDetails")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.DishId, "fk_orderFoodDetails_menu");
 
@@ -249,11 +248,17 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.OrderTableId).HasName("PRIMARY");
 
-            entity.ToTable("orderTables");
+            entity
+                .ToTable("orderTables")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.UserId, "fk_ordertables_users");
 
             entity.Property(e => e.OrderTableId).HasColumnName("orderTableId");
+            entity.Property(e => e.IsCancel)
+                .HasDefaultValueSql("b'0'")
+                .HasColumnType("bit(1)")
+                .HasColumnName("isCancel");
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
@@ -270,9 +275,6 @@ public partial class DbluanvantotnghiepContext : DbContext
             entity.Property(e => e.UserId)
                 .HasMaxLength(20)
                 .HasColumnName("user_id");
-            entity.Property(e => e.isCancel)
-                .HasDefaultValueSql("'0'")
-                .HasColumnName("isCancel");
 
             entity.HasOne(d => d.User).WithMany(p => p.OrderTables)
                 .HasForeignKey(d => d.UserId)
@@ -283,7 +285,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.OrderTablesDetailsId).HasName("PRIMARY");
 
-            entity.ToTable("orderTablesDetails");
+            entity
+                .ToTable("orderTablesDetails")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.OrderTableId, "fk_orderTablesDetails_order");
 
@@ -306,10 +310,16 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.PaymentResultId).HasName("PRIMARY");
 
+            entity.UseCollation("utf8mb4_unicode_ci");
+
+            entity.HasIndex(e => e.CartId, "fk_PaymentResults_cart");
+
             entity.HasIndex(e => e.OrderTableId, "fk_PaymentResults_order");
 
             entity.Property(e => e.BankCode).HasMaxLength(20);
             entity.Property(e => e.BankTransactionId).HasMaxLength(50);
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
+            entity.Property(e => e.Amount).HasPrecision(10, 2).HasColumnName("total_price");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.OrderTableId).HasColumnName("orderTableId");
             entity.Property(e => e.PaymentMethod).HasMaxLength(100);
@@ -317,9 +327,12 @@ public partial class DbluanvantotnghiepContext : DbContext
             entity.Property(e => e.Timestamp).HasColumnType("datetime");
             entity.Property(e => e.TransactionStatusDescription).HasMaxLength(255);
 
+            entity.HasOne(d => d.Cart).WithMany(p => p.PaymentResults)
+                .HasForeignKey(d => d.CartId)
+                .HasConstraintName("fk_PaymentResults_cart");
+
             entity.HasOne(d => d.OrderTable).WithMany(p => p.PaymentResults)
                 .HasForeignKey(d => d.OrderTableId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_PaymentResults_order");
         });
 
@@ -327,7 +340,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.RegionId).HasName("PRIMARY");
 
-            entity.ToTable("region");
+            entity
+                .ToTable("region")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.Property(e => e.RegionId).HasColumnName("region_id");
             entity.Property(e => e.RegionName)
@@ -340,7 +355,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.RolesId).HasName("PRIMARY");
 
-            entity.ToTable("roles");
+            entity
+                .ToTable("roles")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.Property(e => e.RolesId)
                 .ValueGeneratedNever()
@@ -354,7 +371,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.TableId).HasName("PRIMARY");
 
-            entity.ToTable("tables");
+            entity
+                .ToTable("tables")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.RegionId, "fk_tables_region");
 
@@ -378,7 +397,9 @@ public partial class DbluanvantotnghiepContext : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("PRIMARY");
 
-            entity.ToTable("users");
+            entity
+                .ToTable("users")
+                .UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.RolesId, "fk_users_roles");
 

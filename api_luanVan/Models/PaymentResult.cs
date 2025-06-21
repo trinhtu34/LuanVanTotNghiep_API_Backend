@@ -7,9 +7,12 @@ public partial class PaymentResult
 {
     public long PaymentResultId { get; set; }
 
-    public long OrderTableId { get; set; }
+    public long? OrderTableId { get; set; }
 
-    public long PaymentId { get; set; }
+    public long? CartId { get; set; }
+
+    public long? PaymentId { get; set; }
+    public decimal? Amount { get; set; }
 
     public bool IsSuccess { get; set; }
 
@@ -29,5 +32,7 @@ public partial class PaymentResult
 
     public string? TransactionStatusDescription { get; set; }
 
-    public virtual OrderTable OrderTable { get; set; } = null!;
+    public virtual Cart? Cart { get; set; }
+
+    public virtual OrderTable? OrderTable { get; set; }
 }

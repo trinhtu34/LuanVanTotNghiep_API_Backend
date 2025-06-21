@@ -19,9 +19,9 @@ public partial class Menu
 
     public string? Images { get; set; }
 
-    public virtual Category Category { get; set; } = null!;
+    public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
-    public virtual ICollection<GuestOrderFoodDetail> GuestOrderFoodDetails { get; set; } = new List<GuestOrderFoodDetail>();
+    public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<OrderFoodDetail> OrderFoodDetails { get; set; } = new List<OrderFoodDetail>();
 

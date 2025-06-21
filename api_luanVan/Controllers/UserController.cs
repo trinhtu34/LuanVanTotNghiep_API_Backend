@@ -10,8 +10,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public UserController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public UserController(Dbluanvan2Context context)
         {
             _context = context;
         }

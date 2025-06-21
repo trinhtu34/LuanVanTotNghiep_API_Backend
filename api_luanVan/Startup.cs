@@ -19,7 +19,7 @@ public class Startup
 
         var connectionString = Configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<DbluanvantotnghiepContext>(options =>
+        services.AddDbContext<Dbluanvan2Context>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
     }
 

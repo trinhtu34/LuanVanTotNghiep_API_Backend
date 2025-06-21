@@ -10,8 +10,8 @@ namespace api_LuanVan.Controllers
     [ApiController]
     public class OrderTableController : ControllerBase
     {
-        private readonly DbluanvantotnghiepContext _context;
-        public OrderTableController(DbluanvantotnghiepContext context)
+        private readonly Dbluanvan2Context _context;
+        public OrderTableController(Dbluanvan2Context context)
         {
             _context = context;
         }
@@ -24,7 +24,7 @@ namespace api_LuanVan.Controllers
                     OrderTableId = m.OrderTableId,
                     UserId = m.UserId,
                     StartingTime = m.StartingTime,
-                    isCancel = m.isCancel,
+                    IsCancel = m.IsCancel,
                     TotalPrice = m.TotalPrice,
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
@@ -40,7 +40,7 @@ namespace api_LuanVan.Controllers
                     OrderTableId = m.OrderTableId,
                     UserId = m.UserId,
                     StartingTime = m.StartingTime,
-                    isCancel = m.isCancel,
+                    IsCancel = m.IsCancel,
                     TotalPrice = m.TotalPrice,
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
@@ -57,7 +57,7 @@ namespace api_LuanVan.Controllers
             {
                 UserId = dto.UserId,
                 StartingTime = dto.StartingTime,
-                isCancel = dto.isCancel,
+                IsCancel = dto.IsCancel,
                 TotalPrice = dto.TotalPrice,
                 TotalDeposit = dto.TotalDeposit,
                 OrderDate = DateTime.Now
@@ -80,7 +80,7 @@ namespace api_LuanVan.Controllers
 
             //orderTable.UserId = dto.UserId;
             orderTable.StartingTime = dto.StartingTime;
-            orderTable.isCancel = dto.isCancel;
+            orderTable.IsCancel = dto.IsCancel;
             orderTable.TotalPrice = dto.TotalPrice;
             orderTable.TotalDeposit = dto.TotalDeposit;
             _context.Entry(orderTable).State = EntityState.Modified;
