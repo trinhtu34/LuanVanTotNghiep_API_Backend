@@ -319,7 +319,7 @@ public partial class Dbluanvan2Context : DbContext
             entity.Property(e => e.BankCode).HasMaxLength(20);
             entity.Property(e => e.BankTransactionId).HasMaxLength(50);
             entity.Property(e => e.CartId).HasColumnName("cart_id");
-            entity.Property(e => e.Amount).HasPrecision(10, 2).HasColumnName("total_price");
+            entity.Property(e => e.Amount).HasPrecision(10, 2).HasColumnName("Amount");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.OrderTableId).HasColumnName("orderTableId");
             entity.Property(e => e.PaymentMethod).HasMaxLength(100);
