@@ -88,8 +88,8 @@ namespace api_LuanVan.Controllers
             {
                 OrderTableId = paymentDto.OrderTableId,
                 CartId = paymentDto.CartId,
-                PaymentId = paymentDto.PaymentId,
                 Amount = paymentDto.Amount,
+                PaymentId = paymentDto.PaymentId,
                 IsSuccess = paymentDto.IsSuccess,
                 Description = paymentDto.Description,
                 Timestamp = paymentDto.Timestamp,
