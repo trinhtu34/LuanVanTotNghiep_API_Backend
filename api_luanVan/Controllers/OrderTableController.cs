@@ -53,6 +53,10 @@ namespace api_LuanVan.Controllers
         [HttpPost]
         public async Task<ActionResult<DTO_OrderTable>> CreateOrderTable([FromBody] DTO_OrderTable dto)
         {
+            if (dto.TotalDeposit == null)
+            {
+                dto.TotalDeposit = 0;
+            }
             var orderTable = new OrderTable
             {
                 UserId = dto.UserId,
