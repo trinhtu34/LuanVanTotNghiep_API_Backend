@@ -53,22 +53,20 @@ namespace api_LuanVan.Controllers
         [HttpPost]
         public async Task<ActionResult<DTO_OrderTable>> CreateOrderTable([FromBody] DTO_OrderTable dto)
         {
-            if (dto.TotalDeposit == null)
-            {
-                dto.TotalDeposit = 0;
-            }
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var orderTable = new OrderTable
             {
                 UserId = dto.UserId,
                 StartingTime = dto.StartingTime,
                 IsCancel = dto.IsCancel,
                 TotalPrice = dto.TotalPrice,
-                TotalDeposit = dto.TotalDeposit,
-                OrderDate = DateTime.Now
+                TotalDeposit = dto.TotalDeposit ?? 0,
+                OrderDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
             };
             _context.OrderTables.Add(orderTable);
             await _context.SaveChangesAsync();
             dto.OrderTableId = orderTable.OrderTableId;
+            dto.OrderDate = orderTable.OrderDate;
             return CreatedAtAction(nameof(GetOrderTableByUserID), new { userid = dto.UserId }, dto);
         }
 
