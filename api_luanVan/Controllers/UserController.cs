@@ -120,6 +120,45 @@ namespace api_LuanVan.Controllers
 
             return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
         }
+        [HttpPost("signup/guest")]
+        public async Task<ActionResult<DTO_User_Guest>> CreateUserGuest([FromBody] DTO_User_Guest user)
+        {
+            if (user == null)
+                return BadRequest("User data is null.");
+
+            if (string.IsNullOrEmpty(user.UserId))
+            {
+                return BadRequest("UserId is required.");
+            }
+
+            var newUser = new User
+            {
+                UserId = user.UserId,
+                UPassword = "",
+                CustomerName = user.CustomerName,
+                RolesId = 0,
+                PhoneNumber = user.PhoneNumber,
+                Email = "",
+                Address = "",
+                CreateAt = DateTime.Now
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+
+            // map lại cái dữ liệu vào dto để trả về đúng dữ liệu mong muốn
+            var userDto = new DTO_User_Guest
+            {
+                UserId = newUser.UserId,
+                CustomerName = newUser.CustomerName,
+                RolesId = newUser.RolesId,
+                PhoneNumber = newUser.PhoneNumber,
+                CreateAt = newUser.CreateAt
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
+        }
 
         [HttpPost("guestuser")]
         public async Task<ActionResult<DTO_User>> CreateGuestUser([FromBody] DTO_User user)

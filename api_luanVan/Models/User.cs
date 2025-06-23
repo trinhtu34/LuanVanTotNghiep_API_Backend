@@ -22,7 +22,7 @@ public partial class User
     public DateTime? CreateAt { get; set; }
 
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
-
+    
     public virtual ICollection<ContactForm> ContactForms { get; set; } = new List<ContactForm>();
 
     public virtual ICollection<OrderTable> OrderTables { get; set; } = new List<OrderTable>();
