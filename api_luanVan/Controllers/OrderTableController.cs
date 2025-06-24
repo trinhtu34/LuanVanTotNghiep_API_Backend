@@ -59,7 +59,7 @@ namespace api_LuanVan.Controllers
                 UserId = dto.UserId,
                 StartingTime = dto.StartingTime,
                 IsCancel = dto.IsCancel,
-                TotalPrice = dto.TotalPrice,
+                TotalPrice = dto.TotalPrice ?? 0,
                 TotalDeposit = dto.TotalDeposit ?? 0,
                 OrderDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
             };
