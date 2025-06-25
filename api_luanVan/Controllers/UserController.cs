@@ -89,7 +89,7 @@ namespace api_LuanVan.Controllers
 
             if (await _context.Users.AnyAsync(u => u.Email == user.Email))
                 return Conflict("Email already exists.");
-
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var newUser = new User
             {
                 UserId = user.UserId,
@@ -99,7 +99,7 @@ namespace api_LuanVan.Controllers
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
                 Address = user.Address,
-                CreateAt = DateTime.Now
+                CreateAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
             };
 
             _context.Users.Add(newUser);
@@ -130,6 +130,7 @@ namespace api_LuanVan.Controllers
             {
                 return BadRequest("UserId is required.");
             }
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
             var newUser = new User
             {
@@ -140,7 +141,7 @@ namespace api_LuanVan.Controllers
                 PhoneNumber = user.PhoneNumber,
                 Email = "",
                 Address = "",
-                CreateAt = DateTime.Now
+                CreateAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
             };
 
             _context.Users.Add(newUser);
@@ -158,29 +159,6 @@ namespace api_LuanVan.Controllers
             };
 
             return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
-        }
-
-        [HttpPost("guestuser")]
-        public async Task<ActionResult<DTO_User>> CreateGuestUser([FromBody] DTO_User user)
-        {
-            if (user == null)
-                return BadRequest("User data is null.");
-            if (string.IsNullOrEmpty(user.UserId))
-            {
-                return BadRequest("UserId");
-            }
-            if (await _context.Users.AnyAsync(u => u.UserId == user.UserId))
-                return Conflict("UserId already exists.");
-            var newUser = new User
-            {
-                UserId = user.UserId,
-                RolesId = 0, // Guest role
-                CreateAt = DateTime.Now
-            };
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-            //return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
-            return Ok();
         }
 
         [HttpPut("modify/{id}")]
