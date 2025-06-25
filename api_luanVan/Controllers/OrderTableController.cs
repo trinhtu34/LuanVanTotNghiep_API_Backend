@@ -67,6 +67,8 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             dto.OrderTableId = orderTable.OrderTableId;
             dto.OrderDate = orderTable.OrderDate;
+            dto.TotalPrice = orderTable.TotalPrice;
+            dto.TotalDeposit = orderTable.TotalDeposit;
             return CreatedAtAction(nameof(GetOrderTableByUserID), new { userid = dto.UserId }, dto);
         }
 
