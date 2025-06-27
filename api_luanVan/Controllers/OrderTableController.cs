@@ -35,7 +35,8 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterCurrentStartingTime()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
+
             var orderTables = await _context.OrderTables
                 .Where(m => m.StartingTime > currentTime && !m.IsCancel)
                 .Select(m => new DTO_OrderTable
@@ -48,10 +49,13 @@ namespace api_LuanVan.Controllers
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
                 }).ToListAsync();
+
             if (orderTables == null || orderTables.Count == 0)
                 return NotFound();
+
             return Ok(orderTables);
         }
+
 
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
