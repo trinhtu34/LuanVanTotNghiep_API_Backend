@@ -30,6 +30,29 @@ namespace api_LuanVan.Controllers
                     OrderDate = m.OrderDate
                 }).ToListAsync();
         }
+
+        [HttpGet("afterCurrentStartingTime")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterCurrentStartingTime()
+        {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            var orderTables = await _context.OrderTables
+                .Where(m => m.StartingTime > currentTime && !m.IsCancel)
+                .Select(m => new DTO_OrderTable
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate
+                }).ToListAsync();
+            if (orderTables == null || orderTables.Count == 0)
+                return NotFound();
+            return Ok(orderTables);
+        }
+
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {

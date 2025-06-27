@@ -29,6 +29,7 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
 
+
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_OrderTablesDetail>> GetOrderTablesDetailById(int id)
         {
