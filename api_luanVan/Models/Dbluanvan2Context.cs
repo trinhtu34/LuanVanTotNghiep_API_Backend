@@ -1,8 +1,7 @@
-﻿using api_LuanVan.Models;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
-using System;
-using System.Collections.Generic;
 
 namespace api_LuanVan.Models;
 
@@ -77,6 +76,7 @@ public partial class Dbluanvan2Context : DbContext
             entity.HasIndex(e => e.UserId, "fk_cart_user");
 
             entity.Property(e => e.CartId).HasColumnName("cart_id");
+            entity.Property(e => e.IsCancel).HasColumnName("isCancel");
             entity.Property(e => e.OrderTime)
                 .HasColumnType("datetime")
                 .HasColumnName("order_time");
@@ -255,10 +255,7 @@ public partial class Dbluanvan2Context : DbContext
             entity.HasIndex(e => e.UserId, "fk_ordertables_users");
 
             entity.Property(e => e.OrderTableId).HasColumnName("orderTableId");
-            entity.Property(e => e.IsCancel)
-                .HasDefaultValueSql("b'0'")
-                .HasColumnType("bit(1)")
-                .HasColumnName("isCancel");
+            entity.Property(e => e.IsCancel).HasColumnName("isCancel");
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
@@ -266,12 +263,12 @@ public partial class Dbluanvan2Context : DbContext
             entity.Property(e => e.StartingTime)
                 .HasColumnType("datetime")
                 .HasColumnName("starting_time");
-            entity.Property(e => e.TotalPrice)
-                .HasPrecision(10, 2)
-                .HasColumnName("total_price");
             entity.Property(e => e.TotalDeposit)
                 .HasPrecision(10, 2)
                 .HasColumnName("total_deposit");
+            entity.Property(e => e.TotalPrice)
+                .HasPrecision(10, 2)
+                .HasColumnName("total_price");
             entity.Property(e => e.UserId)
                 .HasMaxLength(20)
                 .HasColumnName("user_id");
@@ -316,10 +313,10 @@ public partial class Dbluanvan2Context : DbContext
 
             entity.HasIndex(e => e.OrderTableId, "fk_PaymentResults_order");
 
+            entity.Property(e => e.Amount).HasPrecision(10, 2);
             entity.Property(e => e.BankCode).HasMaxLength(20);
             entity.Property(e => e.BankTransactionId).HasMaxLength(50);
             entity.Property(e => e.CartId).HasColumnName("cart_id");
-            entity.Property(e => e.Amount).HasPrecision(10, 2).HasColumnName("Amount");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.OrderTableId).HasColumnName("orderTableId");
             entity.Property(e => e.PaymentMethod).HasMaxLength(100);

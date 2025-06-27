@@ -38,7 +38,7 @@ namespace api_LuanVan.Controllers
             var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
 
             var orderTables = await _context.OrderTables
-                .Where(m => m.StartingTime > currentTime && !m.IsCancel)
+                .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
                 .Select(m => new DTO_OrderTable
                 {
                     OrderTableId = m.OrderTableId,
@@ -55,7 +55,6 @@ namespace api_LuanVan.Controllers
 
             return Ok(orderTables);
         }
-
 
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)

@@ -11,6 +11,8 @@ public partial class Cart
 
     public DateTime? OrderTime { get; set; }
 
+    public bool? IsCancel { get; set; }
+
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
     public virtual ICollection<PaymentResult> PaymentResults { get; set; } = new List<PaymentResult>();

@@ -8,14 +8,15 @@
 
         public long? CartId { get; set; }
 
-        public long? PaymentId { get; set; }
         public decimal? Amount { get; set; }
 
-        public bool IsSuccess { get; set; }
+        public long? PaymentId { get; set; }
+
+        public bool? IsSuccess { get; set; }
 
         public string? Description { get; set; }
 
-        public DateTime Timestamp { get; set; }
+        public DateTime? Timestamp { get; set; }
 
         public long? VnpayTransactionId { get; set; }
 

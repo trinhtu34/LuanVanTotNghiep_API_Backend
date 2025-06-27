@@ -8,9 +8,10 @@
 
         public DateTime StartingTime { get; set; }
 
-        public bool IsCancel { get; set; }
+        public bool? IsCancel { get; set; }
 
         public decimal? TotalPrice { get; set; }
+
         public decimal? TotalDeposit { get; set; }
 
         public DateTime OrderDate { get; set; }
