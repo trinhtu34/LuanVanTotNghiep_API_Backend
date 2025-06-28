@@ -69,6 +69,59 @@ namespace api_LuanVan.Controllers
 
 
         // sign up
+        [HttpPost("signup/admin")]
+        public async Task<ActionResult<DTO_User>> CreateUserAdmin([FromBody] DTO_User user)
+        {
+            if (user == null)
+                return BadRequest("User data is null.");
+
+            if (string.IsNullOrEmpty(user.UserId) || string.IsNullOrEmpty(user.UPassword)
+                || string.IsNullOrEmpty(user.PhoneNumber) || string.IsNullOrEmpty(user.Email))
+            {
+                return BadRequest("UserId, UPassword, PhoneNumber, Email are required.");
+            }
+
+            if (await _context.Users.AnyAsync(u => u.UserId == user.UserId))
+                return Conflict("UserId already exists.");
+
+            if (await _context.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber))
+                return Conflict("PhoneNumber already exists.");
+
+            if (await _context.Users.AnyAsync(u => u.Email == user.Email))
+                return Conflict("Email already exists.");
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var newUser = new User
+            {
+                UserId = user.UserId,
+                UPassword = user.UPassword,
+                CustomerName = user.CustomerName,
+                RolesId = 1,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                Address = user.Address,
+                CreateAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            // map lại cái dữ liệu vào dto để trả về đúng dữ liệu mong muốn
+            var userDto = new DTO_User
+            {
+                UserId = newUser.UserId,
+                UPassword = newUser.UPassword,
+                CustomerName = newUser.CustomerName,
+                RolesId = newUser.RolesId,
+                PhoneNumber = newUser.PhoneNumber,
+                Email = newUser.Email,
+                Address = newUser.Address,
+                CreateAt = newUser.CreateAt
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
+        }
+
+
         [HttpPost("signup")]
         public async Task<ActionResult<DTO_User>> CreateUser([FromBody] DTO_User user)
         {
@@ -120,6 +173,9 @@ namespace api_LuanVan.Controllers
 
             return CreatedAtAction(nameof(GetUser), new { id = userDto.UserId }, userDto);
         }
+
+
+
         [HttpPost("signup/guest")]
         public async Task<ActionResult<DTO_User_Guest>> CreateUserGuest([FromBody] DTO_User_Guest user)
         {
