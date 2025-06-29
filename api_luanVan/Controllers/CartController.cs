@@ -97,7 +97,9 @@ namespace api_LuanVan.Controllers
             };
             _context.Carts.Add(newCart);
             await _context.SaveChangesAsync();
-            dtoCart.CartId = newCart.CartId; // Set the CartId to the DTO
+            dtoCart.CartId = newCart.CartId;
+            dtoCart.OrderTime = newCart.OrderTime;
+            dtoCart.IsCancel = newCart.IsCancel;
             return CreatedAtAction(nameof(GetCartById), new { cartId = newCart.CartId }, dtoCart);
         }
 
