@@ -72,7 +72,7 @@ namespace api_LuanVan.Controllers
                     OrderDate = m.OrderDate
                 }).ToListAsync();
             if (orderTable == null || orderTable.Count == 0)
-                return NotFound();
+                return Ok();
             return Ok(orderTable);
         }
 
