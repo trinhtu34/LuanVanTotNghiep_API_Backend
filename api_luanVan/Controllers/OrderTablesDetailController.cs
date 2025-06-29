@@ -68,12 +68,12 @@ namespace api_LuanVan.Controllers
         {
             var orderTableDetail = new OrderTablesDetail
             {
-                OrderTablesDetailsId = dto.OrderTablesDetailsId,
                 OrderTableId = dto.OrderTableId,
                 TableId = dto.TableId
             };
             _context.OrderTablesDetails.Add(orderTableDetail);
             await _context.SaveChangesAsync();
+            dto.OrderTablesDetailsId = orderTableDetail.OrderTablesDetailsId;
             return CreatedAtAction(nameof(GetOrderTablesDetailById), new { id = orderTableDetail.OrderTablesDetailsId }, dto);
         }
 
