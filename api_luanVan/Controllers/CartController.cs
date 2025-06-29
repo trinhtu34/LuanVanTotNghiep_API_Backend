@@ -70,18 +70,51 @@ namespace api_LuanVan.Controllers
         [HttpGet("{cartId}")]
         public async Task<ActionResult<DTO_Cart>> GetCartById(int cartId)
         {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var cartItem = await _context.Carts
                 .Where(c => c.CartId == cartId)
                 .Select(c => new DTO_Cart
                 {
                     CartId = c.CartId,
                     UserId = c.UserId,
-                    OrderTime = c.OrderTime,
+                    OrderTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone),
                     IsCancel = c.IsCancel
                 }).FirstOrDefaultAsync();
             if (cartItem == null)
                 return NotFound();
             return Ok(cartItem);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<DTO_Cart>> CreateCart(DTO_Cart dtoCart)
+        {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var newCart = new Cart
+            {
+                UserId = dtoCart.UserId,
+                OrderTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone),
+                IsCancel = dtoCart.IsCancel
+            };
+            _context.Carts.Add(newCart);
+            await _context.SaveChangesAsync();
+            dtoCart.CartId = newCart.CartId; // Set the CartId to the DTO
+            return CreatedAtAction(nameof(GetCartById), new { cartId = newCart.CartId }, dtoCart);
+        }
+
+        [HttpPut("{cartId}")]
+        public async Task<IActionResult> UpdateCart(int cartId, DTO_Cart dtoCart)
+        {
+            if (cartId != dtoCart.CartId)
+                return BadRequest("Cart ID mismatch");
+            var existingCart = await _context.Carts.FindAsync(cartId);
+            if (existingCart == null)
+                return NotFound();
+            existingCart.UserId = dtoCart.UserId;
+            existingCart.OrderTime = dtoCart.OrderTime;
+            existingCart.IsCancel = dtoCart.IsCancel;
+            _context.Entry(existingCart).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
