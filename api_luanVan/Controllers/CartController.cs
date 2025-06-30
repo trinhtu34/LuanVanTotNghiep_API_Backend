@@ -93,7 +93,7 @@ namespace api_LuanVan.Controllers
             {
                 UserId = dtoCart.UserId,
                 OrderTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone),
-                IsCancel = dtoCart.IsCancel
+                IsCancel = false
             };
             _context.Carts.Add(newCart);
             await _context.SaveChangesAsync();
