@@ -25,6 +25,7 @@ namespace api_LuanVan.Controllers
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = c.OrderTime,
+                    TotalPrice = c.TotalPrice,
                     IsCancel = c.IsCancel
                 }).ToListAsync();
             if (cartItems == null || cartItems.Count == 0)
@@ -41,6 +42,7 @@ namespace api_LuanVan.Controllers
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = c.OrderTime,
+                    TotalPrice = c.TotalPrice,
                     IsCancel = c.IsCancel
                 }).ToListAsync();
             if (cartItems == null || cartItems.Count == 0)
@@ -60,6 +62,7 @@ namespace api_LuanVan.Controllers
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = c.OrderTime,
+                    TotalPrice = c.TotalPrice,
                     IsCancel = c.IsCancel
                 }).ToListAsync();
             if (cartItems == null || cartItems.Count == 0)
@@ -78,6 +81,7 @@ namespace api_LuanVan.Controllers
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone),
+                    TotalPrice = c.TotalPrice,
                     IsCancel = c.IsCancel
                 }).FirstOrDefaultAsync();
             if (cartItem == null)
@@ -93,6 +97,7 @@ namespace api_LuanVan.Controllers
             {
                 UserId = dtoCart.UserId,
                 OrderTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone),
+                TotalPrice = dtoCart.TotalPrice,
                 IsCancel = false
             };
             _context.Carts.Add(newCart);
@@ -113,10 +118,12 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             existingCart.UserId = dtoCart.UserId;
             existingCart.OrderTime = dtoCart.OrderTime;
+            existingCart.TotalPrice = dtoCart.TotalPrice;
             existingCart.IsCancel = dtoCart.IsCancel;
             _context.Entry(existingCart).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
     }
 }
