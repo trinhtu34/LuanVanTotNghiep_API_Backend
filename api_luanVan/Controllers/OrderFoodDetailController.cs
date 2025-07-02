@@ -100,5 +100,16 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrderFoodDetail(int id)
+        {
+            var orderFoodDetail = await _context.OrderFoodDetails.FindAsync(id);
+            if (orderFoodDetail == null)
+                return NotFound();
+            _context.OrderFoodDetails.Remove(orderFoodDetail);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
