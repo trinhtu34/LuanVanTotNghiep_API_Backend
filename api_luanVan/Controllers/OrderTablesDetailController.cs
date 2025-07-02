@@ -91,6 +91,17 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrderTablesDetail(int id)
+        {
+            var orderTableDetail = await _context.OrderTablesDetails.FindAsync(id);
+            if (orderTableDetail == null)
+                return NotFound();
+            _context.OrderTablesDetails.Remove(orderTableDetail);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
 public class tbResposen
