@@ -16,11 +16,12 @@ namespace api_LuanVan.Controllers
             _context = context;
         }
 
+        // tất cả phương thức GET đều trả về DTO_MenuWithoutAvailabel , và đặt if là IsAvailable = true
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetAllMenus()
+        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetAllMenus()
         {
             return await _context.Menus
-                .Select(m => new DTO_Menu
+                .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
                     DishName = m.DishName,
@@ -33,11 +34,11 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
         [HttpGet("category/{categoryId}")]
-        public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetMenusByCategoryId(int categoryId)
+        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByCategoryId(int categoryId)
         {
             var menus = await _context.Menus
                 .Where(m => m.CategoryId == categoryId)
-                .Select(m => new DTO_Menu
+                .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
                     DishName = m.DishName,
@@ -53,11 +54,11 @@ namespace api_LuanVan.Controllers
             return menus;
         }
         [HttpGet("region/{regionId}")]
-        public async Task<ActionResult<IEnumerable<DTO_Menu>>> GetMenusByRegionId(int regionId)
+        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByRegionId(int regionId)
         {
             var menus = await _context.Menus
                 .Where(m => m.RegionId == regionId)
-                .Select(m => new DTO_Menu
+                .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
                     DishName = m.DishName,
@@ -73,13 +74,13 @@ namespace api_LuanVan.Controllers
             return menus;
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<DTO_Menu>> GetMenu(string id)
+        public async Task<ActionResult<DTO_MenuWithoutAvailabel>> GetMenu(string id)
         {
             var menu = await _context.Menus.FindAsync(id);
             if (menu == null)
                 return NotFound();
 
-            return new DTO_Menu
+            return new DTO_MenuWithoutAvailabel
             {
                 DishId = menu.DishId,
                 DishName = menu.DishName,
@@ -91,8 +92,10 @@ namespace api_LuanVan.Controllers
             };
         }
 
+
+        // thử nghiệm là thêm thuộc tính isAvailable vào DTO_MenuFull , không làm thay đổi các phương thức get ở trên
         [HttpPost]
-        public async Task<ActionResult<DTO_Menu>> CreateMenu([FromBody] DTO_Menu dto)
+        public async Task<ActionResult<DTO_MenuWithoutAvailabel>> CreateMenu([FromBody] DTO_MenuWithoutAvailabel dto)
         {
             var menu = new Menu
             {
@@ -112,7 +115,7 @@ namespace api_LuanVan.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<DTO_Menu>> UpdateMenu(string id, [FromBody] DTO_Menu dto)
+        public async Task<ActionResult<DTO_MenuWithoutAvailabel>> UpdateMenu(string id, [FromBody] DTO_MenuWithoutAvailabel dto)
         {
             if (id != dto.DishId)
                 return BadRequest("DishId in URL and body do not match.");
@@ -135,17 +138,17 @@ namespace api_LuanVan.Controllers
         }
 
         //// DELETE: api/Menu/{id}
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteMenu(string id)
-        //{
-        //    var menu = await _context.Menus.FindAsync(id);
-        //    if (menu == null)
-        //        return NotFound();
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMenu(string id)
+        {
+            var menu = await _context.Menus.FindAsync(id);
+            if (menu == null)
+                return NotFound();
 
-        //    _context.Menus.Remove(menu);
-        //    await _context.SaveChangesAsync();
+            _context.Menus.Remove(menu);
+            await _context.SaveChangesAsync();
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
     }
 }

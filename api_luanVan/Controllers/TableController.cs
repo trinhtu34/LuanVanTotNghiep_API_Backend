@@ -102,5 +102,16 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTable(int id)
+        {
+            var table = await _context.Tables.FindAsync(id);
+            if (table == null)
+                return NotFound();
+            _context.Tables.Remove(table);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

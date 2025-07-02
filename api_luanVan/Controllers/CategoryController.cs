@@ -85,20 +85,20 @@ namespace api_LuanVan.Controllers
         }
 
         //// DELETE: api/Category/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteCategory(int id)
-        //{
-        //    var category = await _context.Categories.FindAsync(id);
-        //    if (category == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
 
-        //    _context.Categories.Remove(category);
-        //    await _context.SaveChangesAsync();
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
         private bool CategoryExists(int id)
         {
