@@ -110,7 +110,6 @@ namespace api_LuanVan.Controllers
 
             //orderTable.UserId = dto.UserId;
             orderTable.StartingTime = dto.StartingTime;
-            orderTable.IsCancel = dto.IsCancel;
             orderTable.TotalPrice = dto.TotalPrice;
             orderTable.TotalDeposit = dto.TotalDeposit;
             _context.Entry(orderTable).State = EntityState.Modified;
