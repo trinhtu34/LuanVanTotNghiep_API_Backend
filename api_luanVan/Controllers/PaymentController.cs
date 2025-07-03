@@ -102,7 +102,7 @@ namespace api_LuanVan.Controllers
             };
             _context.PaymentResults.Add(paymentResult);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetPaymentResultsByOrderTableId), new { id = paymentResult.OrderTableId }, paymentDto);
+            return NoContent();
         }
 
         //[HttpPut("ordertable/{id}")]
