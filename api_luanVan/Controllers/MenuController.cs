@@ -115,11 +115,12 @@ namespace api_LuanVan.Controllers
                 Images = menu.Images
             };
         }
+        // method này chỉ dành cho admin để chỉnh sửa menu
         [HttpGet("admin/edit/{id}")]
         public async Task<ActionResult<DTO_MenuFull>> GetMenuForEdit(string id)
         {
             var menu = await _context.Menus
-                .Where(m => m.DishId == id && m.IsAvailable == true)
+                .Where(m => m.DishId == id)
                 .FirstOrDefaultAsync();
 
             if (menu == null)
