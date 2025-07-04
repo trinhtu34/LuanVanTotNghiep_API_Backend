@@ -35,11 +35,10 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
         }
         [HttpGet("byadmin")]
-        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetAllMenusByAdmin()
+        public async Task<ActionResult<IEnumerable<DTO_MenuFull>>> GetAllMenusByAdmin()
         {
             return await _context.Menus
-                .Where(m => m.IsAvailable == true)
-                .Select(m => new DTO_MenuWithoutAvailabel
+                .Select(m => new DTO_MenuFull
                 {
                     DishId = m.DishId,
                     DishName = m.DishName,
@@ -47,7 +46,8 @@ namespace api_LuanVan.Controllers
                     Descriptions = m.Descriptions,
                     CategoryId = m.CategoryId,
                     RegionId = m.RegionId,
-                    Images = m.Images
+                    Images = m.Images,
+                    IsAvailable = m.IsAvailable
                 })
                 .ToListAsync();
         }
@@ -115,7 +115,7 @@ namespace api_LuanVan.Controllers
                 Images = menu.Images
             };
         }
-        [HttpGet("edit/{id}")]
+        [HttpGet("admin/edit/{id}")]
         public async Task<ActionResult<DTO_MenuFull>> GetMenuForEdit(string id)
         {
             var menu = await _context.Menus
@@ -159,7 +159,7 @@ namespace api_LuanVan.Controllers
             //return Ok();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("admin/{id}")]
         public async Task<ActionResult<DTO_MenuFull>> UpdateMenu(string id, [FromBody] DTO_MenuFull dto)
         {
             if (id != dto.DishId)
@@ -182,24 +182,6 @@ namespace api_LuanVan.Controllers
 
             return Ok(dto);
         }
-        [HttpGet("InCludeAvailability")]
-        public async Task<ActionResult<IEnumerable<DTO_MenuFull>>> GetAllMenusWithAvailability()
-        {
-            return await _context.Menus
-                .Select(m => new DTO_MenuFull
-                {
-                    DishId = m.DishId,
-                    DishName = m.DishName,
-                    Price = m.Price,
-                    Descriptions = m.Descriptions,
-                    CategoryId = m.CategoryId,
-                    RegionId = m.RegionId,
-                    Images = m.Images,
-                    IsAvailable = m.IsAvailable
-                })
-                .ToListAsync();
-        }
-
         //// DELETE: api/Menu/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMenu(string id)
