@@ -21,6 +21,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetAllMenus()
         {
             return await _context.Menus
+                .Where(m => m.IsAvailable == true)
                 .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
@@ -37,7 +38,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByCategoryId(int categoryId)
         {
             var menus = await _context.Menus
-                .Where(m => m.CategoryId == categoryId)
+                .Where(m => m.CategoryId == categoryId && m.IsAvailable == true) // ✅ Thêm điều kiện
                 .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
@@ -49,15 +50,18 @@ namespace api_LuanVan.Controllers
                     Images = m.Images
                 })
                 .ToListAsync();
+
             if (menus == null || !menus.Any())
                 return NotFound();
+
             return menus;
         }
+
         [HttpGet("region/{regionId}")]
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByRegionId(int regionId)
         {
             var menus = await _context.Menus
-                .Where(m => m.RegionId == regionId)
+                .Where(m => m.RegionId == regionId && m.IsAvailable == true)
                 .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
@@ -76,7 +80,10 @@ namespace api_LuanVan.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DTO_MenuWithoutAvailabel>> GetMenu(string id)
         {
-            var menu = await _context.Menus.FindAsync(id);
+            var menu = await _context.Menus
+                .Where(m => m.DishId == id && m.IsAvailable == true)
+                .FirstOrDefaultAsync();
+
             if (menu == null)
                 return NotFound();
 
@@ -91,7 +98,6 @@ namespace api_LuanVan.Controllers
                 Images = menu.Images
             };
         }
-
 
         // thử nghiệm là thêm thuộc tính isAvailable vào DTO_MenuFull , không làm thay đổi các phương thức get ở trên
         [HttpPost]
@@ -115,7 +121,7 @@ namespace api_LuanVan.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<DTO_MenuWithoutAvailabel>> UpdateMenu(string id, [FromBody] DTO_MenuWithoutAvailabel dto)
+        public async Task<ActionResult<DTO_MenuFull>> UpdateMenu(string id, [FromBody] DTO_MenuFull dto)
         {
             if (id != dto.DishId)
                 return BadRequest("DishId in URL and body do not match.");
@@ -130,11 +136,29 @@ namespace api_LuanVan.Controllers
             menu.CategoryId = dto.CategoryId;
             menu.RegionId = dto.RegionId;
             menu.Images = dto.Images;
+            menu.IsAvailable = dto.IsAvailable;
 
             _context.Entry(menu).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok(dto);
+        }
+        [HttpGet("InCludeAvailability")]
+        public async Task<ActionResult<IEnumerable<DTO_MenuFull>>> GetAllMenusWithAvailability()
+        {
+            return await _context.Menus
+                .Select(m => new DTO_MenuFull
+                {
+                    DishId = m.DishId,
+                    DishName = m.DishName,
+                    Price = m.Price,
+                    Descriptions = m.Descriptions,
+                    CategoryId = m.CategoryId,
+                    RegionId = m.RegionId,
+                    Images = m.Images,
+                    IsAvailable = m.IsAvailable
+                })
+                .ToListAsync();
         }
 
         //// DELETE: api/Menu/{id}

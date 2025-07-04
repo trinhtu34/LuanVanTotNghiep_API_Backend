@@ -7,7 +7,6 @@
         public string DishName { get; set; } = null!;
 
         public decimal Price { get; set; }
-        public bool IsAvailable { get; set; } = true;
 
         public string? Descriptions { get; set; }
 
@@ -16,5 +15,7 @@
         public int RegionId { get; set; }
 
         public string? Images { get; set; }
+
+        public bool? IsAvailable { get; set; }
     }
 }

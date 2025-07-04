@@ -19,6 +19,8 @@ public partial class Menu
 
     public string? Images { get; set; }
 
+    public bool? IsAvailable { get; set; }
+
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
     public virtual Category Category { get; set; } = null!;
