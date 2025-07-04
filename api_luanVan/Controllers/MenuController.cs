@@ -34,6 +34,23 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
         }
+        [HttpGet("byadmin")]
+        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetAllMenusByAdmin()
+        {
+            return await _context.Menus
+                .Where(m => m.IsAvailable == true)
+                .Select(m => new DTO_MenuWithoutAvailabel
+                {
+                    DishId = m.DishId,
+                    DishName = m.DishName,
+                    Price = m.Price,
+                    Descriptions = m.Descriptions,
+                    CategoryId = m.CategoryId,
+                    RegionId = m.RegionId,
+                    Images = m.Images
+                })
+                .ToListAsync();
+        }
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByCategoryId(int categoryId)
         {
@@ -96,6 +113,28 @@ namespace api_LuanVan.Controllers
                 CategoryId = menu.CategoryId,
                 RegionId = menu.RegionId,
                 Images = menu.Images
+            };
+        }
+        [HttpGet("edit/{id}")]
+        public async Task<ActionResult<DTO_MenuFull>> GetMenuForEdit(string id)
+        {
+            var menu = await _context.Menus
+                .Where(m => m.DishId == id && m.IsAvailable == true)
+                .FirstOrDefaultAsync();
+
+            if (menu == null)
+                return NotFound();
+
+            return new DTO_MenuFull
+            {
+                DishId = menu.DishId,
+                DishName = menu.DishName,
+                Price = menu.Price,
+                Descriptions = menu.Descriptions,
+                CategoryId = menu.CategoryId,
+                RegionId = menu.RegionId,
+                Images = menu.Images,
+                IsAvailable = menu.IsAvailable
             };
         }
 
