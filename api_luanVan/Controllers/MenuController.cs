@@ -98,6 +98,28 @@ namespace api_LuanVan.Controllers
                 Images = menu.Images
             };
         }
+        [HttpGet("edit/{id}")]
+        public async Task<ActionResult<DTO_MenuFull>> GetMenuForEdit(string id)
+        {
+            var menu = await _context.Menus
+                .Where(m => m.DishId == id && m.IsAvailable == true)
+                .FirstOrDefaultAsync();
+
+            if (menu == null)
+                return NotFound();
+
+            return new DTO_MenuFull
+            {
+                DishId = menu.DishId,
+                DishName = menu.DishName,
+                Price = menu.Price,
+                Descriptions = menu.Descriptions,
+                CategoryId = menu.CategoryId,
+                RegionId = menu.RegionId,
+                Images = menu.Images,
+                IsAvailable = menu.IsAvailable
+            };
+        }
 
         // thử nghiệm là thêm thuộc tính isAvailable vào DTO_MenuFull , không làm thay đổi các phương thức get ở trên
         [HttpPost]
