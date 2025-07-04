@@ -45,6 +45,7 @@ public partial class Dbluanvan2Context : DbContext
     //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
     //        => optionsBuilder.UseMySql("server=database-1.cbqiyiaaa98a.ap-southeast-1.rds.amazonaws.com;database=dbluanvan2;user id=admin;password=tuhoami9998", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -194,6 +195,9 @@ public partial class Dbluanvan2Context : DbContext
             entity.Property(e => e.Images)
                 .HasMaxLength(255)
                 .HasColumnName("images");
+            entity.Property(e => e.IsAvailable)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("isAvailable");
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
