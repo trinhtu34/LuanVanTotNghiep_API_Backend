@@ -34,6 +34,23 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
         }
+        [HttpGet("byadmin")]
+        public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetAllMenusByAdmin()
+        {
+            return await _context.Menus
+                .Where(m => m.IsAvailable == true)
+                .Select(m => new DTO_MenuWithoutAvailabel
+                {
+                    DishId = m.DishId,
+                    DishName = m.DishName,
+                    Price = m.Price,
+                    Descriptions = m.Descriptions,
+                    CategoryId = m.CategoryId,
+                    RegionId = m.RegionId,
+                    Images = m.Images
+                })
+                .ToListAsync();
+        }
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByCategoryId(int categoryId)
         {
