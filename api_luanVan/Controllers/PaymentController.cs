@@ -66,13 +66,29 @@ namespace api_LuanVan.Controllers
             return paymentResults;
         }
         [HttpGet("ordertable/status/{id}")]
-        public async Task<ActionResult<IEnumerable<DTO_PaymentStatus>>> GetPaymentStatusByOrderTableId(long id)
+        public async Task<ActionResult<IEnumerable<DTO_PaymentStatusOrderTable>>> GetPaymentStatusByOrderTableId(long id)
         {
             var paymentStatuses = await _context.PaymentResults
                 .Where(pr => pr.OrderTableId == id)
-                .Select(pr => new DTO_PaymentStatus
+                .Select(pr => new DTO_PaymentStatusOrderTable
                 {
                     OrderTableId = pr.OrderTableId,
+                    IsSuccess = pr.IsSuccess
+                }).ToListAsync();
+
+            if (paymentStatuses == null || !paymentStatuses.Any())
+                return NotFound();
+
+            return paymentStatuses;
+        }
+        [HttpGet("cart/status/{id}")]
+        public async Task<ActionResult<IEnumerable<DTO_PaymentStatusCart>>> GetPaymentStatusByCartId(long id)
+        {
+            var paymentStatuses = await _context.PaymentResults
+                .Where(pr => pr.CartId == id)
+                .Select(pr => new DTO_PaymentStatusCart
+                {
+                    CartId = pr.CartId,
                     IsSuccess = pr.IsSuccess
                 }).ToListAsync();
 
@@ -105,7 +121,5 @@ namespace api_LuanVan.Controllers
             return NoContent();
         }
 
-        //[HttpPut("ordertable/{id}")]
-        //[HttpPut("cart/{id}")]
     }
 }
