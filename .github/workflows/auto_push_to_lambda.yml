@@ -108,5 +108,5 @@ jobs:
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \
-            --function-name luanvantotnghiep-AspNetCoreFunction-oK6W6kMIhTKn \
+            --function-name luanvantotnghiep-AspNetCoreFunction-nFjI4d5AKX10 \
             --zip-file fileb://lambda.zip
