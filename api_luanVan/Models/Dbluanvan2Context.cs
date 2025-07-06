@@ -44,8 +44,9 @@ public partial class Dbluanvan2Context : DbContext
 
     //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseMySql("server=database-1.cbqiyiaaa98a.ap-southeast-1.rds.amazonaws.com;database=dbluanvan2;user id=admin;password=tuhoami9998", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
-    
+    //        => optionsBuilder.UseMySql("server=database-1.cjcwoi4ycaui.ap-southeast-1.rds.amazonaws.com;database=dbluanvan2;user id=admin;password=tuhoami9998", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -62,16 +63,14 @@ public partial class Dbluanvan2Context : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .UseCollation("utf8mb4_0900_ai_ci")
+            .UseCollation("utf8mb4_unicode_ci")
             .HasCharSet("utf8mb4");
 
         modelBuilder.Entity<Cart>(entity =>
         {
             entity.HasKey(e => e.CartId).HasName("PRIMARY");
 
-            entity
-                .ToTable("Cart")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("Cart");
 
             entity.HasIndex(e => e.UserId, "fk_cart_user");
 
@@ -97,9 +96,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.CartDetailsId).HasName("PRIMARY");
 
-            entity
-                .ToTable("cart_details")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("cart_details");
 
             entity.HasIndex(e => e.DishId, "fk_cart_details_menu");
 
@@ -131,9 +128,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.CategoryId).HasName("PRIMARY");
 
-            entity
-                .ToTable("category")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("category");
 
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CategoryName)
@@ -146,9 +141,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.ContactId).HasName("PRIMARY");
 
-            entity
-                .ToTable("contact_form")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("contact_form");
 
             entity.HasIndex(e => e.UserId, "fk_contact_form_user");
 
@@ -174,9 +167,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.DishId).HasName("PRIMARY");
 
-            entity
-                .ToTable("menu")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("menu");
 
             entity.HasIndex(e => e.CategoryId, "fk_menu_category");
 
@@ -218,9 +209,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.OrderFoodDetailsId).HasName("PRIMARY");
 
-            entity
-                .ToTable("orderFoodDetails")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("orderFoodDetails");
 
             entity.HasIndex(e => e.DishId, "fk_orderFoodDetails_menu");
 
@@ -254,9 +243,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.OrderTableId).HasName("PRIMARY");
 
-            entity
-                .ToTable("orderTables")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("orderTables");
 
             entity.HasIndex(e => e.UserId, "fk_ordertables_users");
 
@@ -288,9 +275,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.OrderTablesDetailsId).HasName("PRIMARY");
 
-            entity
-                .ToTable("orderTablesDetails")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("orderTablesDetails");
 
             entity.HasIndex(e => e.OrderTableId, "fk_orderTablesDetails_order");
 
@@ -312,8 +297,6 @@ public partial class Dbluanvan2Context : DbContext
         modelBuilder.Entity<PaymentResult>(entity =>
         {
             entity.HasKey(e => e.PaymentResultId).HasName("PRIMARY");
-
-            entity.UseCollation("utf8mb4_unicode_ci");
 
             entity.HasIndex(e => e.CartId, "fk_PaymentResults_cart");
 
@@ -343,9 +326,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.RegionId).HasName("PRIMARY");
 
-            entity
-                .ToTable("region")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("region");
 
             entity.Property(e => e.RegionId).HasColumnName("region_id");
             entity.Property(e => e.RegionName)
@@ -358,9 +339,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.RolesId).HasName("PRIMARY");
 
-            entity
-                .ToTable("roles")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("roles");
 
             entity.Property(e => e.RolesId)
                 .ValueGeneratedNever()
@@ -374,9 +353,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.TableId).HasName("PRIMARY");
 
-            entity
-                .ToTable("tables")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("tables");
 
             entity.HasIndex(e => e.RegionId, "fk_tables_region");
 
@@ -400,9 +377,7 @@ public partial class Dbluanvan2Context : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("PRIMARY");
 
-            entity
-                .ToTable("users")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("users");
 
             entity.HasIndex(e => e.RolesId, "fk_users_roles");
 

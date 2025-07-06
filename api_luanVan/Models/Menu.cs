@@ -13,13 +13,13 @@ public partial class Menu
 
     public string? Descriptions { get; set; }
 
+    public bool? IsAvailable { get; set; }
+
     public int CategoryId { get; set; }
 
     public int RegionId { get; set; }
 
     public string? Images { get; set; }
-
-    public bool? IsAvailable { get; set; }
 
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
