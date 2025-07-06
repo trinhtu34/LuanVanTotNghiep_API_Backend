@@ -151,6 +151,7 @@ namespace api_LuanVan.Controllers
                 Descriptions = dto.Descriptions,
                 CategoryId = dto.CategoryId,
                 RegionId = dto.RegionId,
+                IsAvailable = false,
                 Images = dto.Images
             };
             _context.Menus.Add(menu);
