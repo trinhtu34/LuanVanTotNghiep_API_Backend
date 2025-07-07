@@ -130,5 +130,38 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpGet("user/count/{id}")]
+        public async Task<ActionResult<int>> GetOrderTableCountByUserId(string id)
+        {
+            var count = await _context.OrderTables
+                .Where(m => m.UserId == id)
+                .CountAsync();
+            if (count == 0)
+                return NotFound();
+            return Ok(count);
+        }
+        [HttpGet("user/paid/count/{id}")]
+        public async Task<ActionResult<int>> GetpaidOrderTableCountByUserId(string id)
+        {
+            var count = await _context.OrderTables
+                .Where(ot => ot.UserId == id)
+                .Where(ot => _context.PaymentResults
+                    .Any(p => p.OrderTableId == ot.OrderTableId && p.IsSuccess == true))
+                .CountAsync();
+
+            return Ok(count);
+        }
+        [HttpGet("user/unpaid/count/{id}")]
+        public async Task<ActionResult<int>> GetUnPaidOrderTableCountByUserId(string id)
+        {
+            var count = await _context.OrderTables
+                .Where(ot => ot.UserId == id)
+                .Where(ot => !_context.PaymentResults
+                    .Any(p => p.OrderTableId == ot.OrderTableId && p.IsSuccess == true))
+                .CountAsync();
+
+            return Ok(count);
+        }
     }
 }
