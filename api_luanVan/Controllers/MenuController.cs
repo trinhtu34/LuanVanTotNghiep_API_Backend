@@ -72,6 +72,43 @@ namespace api_LuanVan.Controllers
 
             return Ok(result);
         }
+        [HttpGet("quantity/excludecount")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAllMenusByQuantity2()
+        {
+            // B1: Lấy dữ liệu từ DB, thực hiện group và select đơn giản
+            var groupedData = await _context.Menus
+                .Where(m => m.IsAvailable == true)
+                .GroupBy(m => EF.Functions.Collate(m.DishName, "utf8mb4_general_ci"))
+                .Select(g => new
+                {
+                    Count = g.Count(),
+                    DishId = g.Min(x => x.DishId) // Lấy DishId nhỏ nhất (ổn định)
+                })
+                .ToListAsync();
+
+            // B2: Join lại để lấy chi tiết món ăn theo DishId
+            var dishIds = groupedData.Select(x => x.DishId).ToList();
+
+            var dishDetails = await _context.Menus
+                .Where(m => dishIds.Contains(m.DishId))
+                .ToListAsync();
+
+            // B3: Merge dữ liệu và trả về
+            var result = groupedData
+                .Join(dishDetails, g => g.DishId, d => d.DishId, (g, d) => new
+                {
+                    DishId = d.DishId,
+                    DishName = d.DishName,
+                    Price = d.Price,
+                    Descriptions = d.Descriptions,
+                    CategoryId = d.CategoryId,
+                    RegionId = d.RegionId,
+                    Images = d.Images
+                })
+                .ToList();
+
+            return Ok(result);
+        }
         [HttpGet("quantity/count")]
         public async Task<ActionResult<int>> GetDistinctMenuCount()
         {
@@ -106,7 +143,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<IEnumerable<DTO_MenuWithoutAvailabel>>> GetMenusByCategoryId(int categoryId)
         {
             var menus = await _context.Menus
-                .Where(m => m.CategoryId == categoryId && m.IsAvailable == true) // ✅ Thêm điều kiện
+                .Where(m => m.CategoryId == categoryId && m.IsAvailable == true)
                 .Select(m => new DTO_MenuWithoutAvailabel
                 {
                     DishId = m.DishId,
