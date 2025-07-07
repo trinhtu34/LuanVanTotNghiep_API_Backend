@@ -124,6 +124,17 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPut("state/{id}")]
+        public async Task<ActionResult<DTO_Cart>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart dto)
+        {
+            var cart = await _context.Carts.FindAsync(id);
+            if (cart == null)
+                return NotFound();
 
+            cart.IsCancel = dto.IsCancel;
+            _context.Entry(cart).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
