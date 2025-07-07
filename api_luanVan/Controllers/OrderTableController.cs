@@ -120,9 +120,6 @@ namespace api_LuanVan.Controllers
         [HttpPut("state/{id}")]
         public async Task<ActionResult<DTO_OrderTable>> UpdateOrderTableByState(long id, [FromBody] DTO_OrderTable dto)
         {
-            if (id != dto.OrderTableId)
-                return BadRequest();
-
             var orderTable = await _context.OrderTables.FindAsync(id);
             if (orderTable == null)
                 return NotFound();
