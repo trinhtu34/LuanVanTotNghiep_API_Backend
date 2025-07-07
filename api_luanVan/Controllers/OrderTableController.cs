@@ -163,5 +163,26 @@ namespace api_LuanVan.Controllers
 
             return Ok(count);
         }
+
+        [HttpGet("canceled/{id}")]
+        public async Task<ActionResult<int>> GetOrderTableCanceledByUserId(string id)
+        {
+            var count = await _context.OrderTables
+                .Where(m => m.UserId == id && m.IsCancel == true)
+                .CountAsync();
+            if (count == 0)
+                return NotFound();
+            return Ok(count);
+        }
+        [HttpGet("canceled")]
+        public async Task<ActionResult<int>> GetAllOrderTableCanceled()
+        {
+            var count = await _context.OrderTables
+                .Where(m => m.IsCancel == true)
+                .CountAsync();
+            if (count == 0)
+                return NotFound();
+            return Ok(count);
+        }
     }
 }
