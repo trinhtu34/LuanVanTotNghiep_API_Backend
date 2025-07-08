@@ -11,4 +11,5 @@
 
         public bool? IsCancel { get; set; }
     }
+
 }

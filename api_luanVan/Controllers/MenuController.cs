@@ -249,6 +249,7 @@ namespace api_LuanVan.Controllers
             //return Ok();
         }
 
+        // api sửa thông tin của 1 đơn đặt món ăn , chỉ dành cho admin
         [HttpPut("admin/{id}")]
         public async Task<ActionResult<DTO_MenuFull>> UpdateMenu(string id, [FromBody] DTO_MenuFull dto)
         {
