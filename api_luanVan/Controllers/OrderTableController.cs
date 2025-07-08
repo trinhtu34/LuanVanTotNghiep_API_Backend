@@ -57,6 +57,27 @@ namespace api_LuanVan.Controllers
 
             return Ok(orderTables);
         }
+
+        // api trả về đơn đặt bàn kèm trạng thái thanh toán 
+        [HttpGet("paymentstatus")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTablesWithPaymentStatus()
+        {
+            var orderTables = await _context.OrderTables
+                .Select(m => new DTO_OrderTable_Paymentstatus
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate,
+                    IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
+                }).ToListAsync();
+            if (orderTables == null || orderTables.Count == 0)
+                return NotFound();
+            return Ok(orderTables);
+        }
         // lấy thông tin đơn đặt bàn theo id
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
