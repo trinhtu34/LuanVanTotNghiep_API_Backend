@@ -34,14 +34,14 @@ namespace api_LuanVan.Controllers
 
         // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau 
         [HttpGet("afterCurrentStartingTime")]
-        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterCurrentStartingTime()
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTableAfterCurrentStartingTime()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
 
             var orderTables = await _context.OrderTables
                 .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
-                .Select(m => new DTO_OrderTable
+                .Select(m => new DTO_OrderTable_Paymentstatus
                 {
                     OrderTableId = m.OrderTableId,
                     UserId = m.UserId,
@@ -49,7 +49,9 @@ namespace api_LuanVan.Controllers
                     IsCancel = m.IsCancel,
                     TotalPrice = m.TotalPrice,
                     TotalDeposit = m.TotalDeposit,
-                    OrderDate = m.OrderDate
+                    OrderDate = m.OrderDate,
+                    IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
+
                 }).ToListAsync();
 
             if (orderTables == null || orderTables.Count == 0)
