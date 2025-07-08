@@ -15,6 +15,7 @@ namespace api_LuanVan.Controllers
         {
             _context = context;
         }
+        // lấy tất cả đơn đặt bàn
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetAllOrderTables()
         {
@@ -31,6 +32,7 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
 
+        // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau 
         [HttpGet("afterCurrentStartingTime")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterCurrentStartingTime()
         {
@@ -55,7 +57,7 @@ namespace api_LuanVan.Controllers
 
             return Ok(orderTables);
         }
-
+        // lấy thông tin đơn đặt bàn theo id
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
@@ -76,6 +78,7 @@ namespace api_LuanVan.Controllers
             return Ok(orderTable);
         }
 
+        // tạo 1 đơn đặt bàn mới 
         [HttpPost]
         public async Task<ActionResult<DTO_OrderTable>> CreateOrderTable([FromBody] DTO_OrderTable dto)
         {
@@ -97,7 +100,7 @@ namespace api_LuanVan.Controllers
             dto.TotalDeposit = orderTable.TotalDeposit;
             return CreatedAtAction(nameof(GetOrderTableByUserID), new { userid = dto.UserId }, dto);
         }
-
+        // sửa thông tin của 1 đơn đặt bàn , nhưng THỪA
         [HttpPut("{id}")]
         public async Task<ActionResult<DTO_OrderTable>> UpdateOrderTable(long id, [FromBody] DTO_OrderTable dto)
         {
@@ -117,6 +120,7 @@ namespace api_LuanVan.Controllers
             return NoContent();
         }
 
+        // thay đổi trạng thái của 1 đơn đặt bàn
         [HttpPut("state/{id}")]
         public async Task<ActionResult<DTO_OrderTable>> UpdateOrderTableByState(long id, [FromBody] DTO_OrderTable dto)
         {
@@ -130,7 +134,7 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-
+        // lấy số lượng đơn đặt bàn của 1 user
         [HttpGet("user/count/{id}")]
         public async Task<ActionResult<int>> GetOrderTableCountByUserId(string id)
         {
@@ -141,6 +145,7 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(count);
         }
+        // lấy số lượng đơn đặt bàn đã thanh toán của 1 user
         [HttpGet("user/paid/count/{id}")]
         public async Task<ActionResult<int>> GetpaidOrderTableCountByUserId(string id)
         {
@@ -152,6 +157,7 @@ namespace api_LuanVan.Controllers
 
             return Ok(count);
         }
+        // lấy số lượng đơn đặt bàn chưa thanh toán của 1 user
         [HttpGet("user/unpaid/count/{id}")]
         public async Task<ActionResult<int>> GetUnPaidOrderTableCountByUserId(string id)
         {
@@ -163,7 +169,51 @@ namespace api_LuanVan.Controllers
 
             return Ok(count);
         }
-
+        // lấy thông tin đơn đặt bàn đã thanh toán của 1 user
+        [HttpGet("user/paid/{userid}")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetPaidOrderTableByUserId(string userid)
+        {
+            var orderTables = await _context.OrderTables
+                .Where(ot => ot.UserId == userid)
+                .Where(ot => _context.PaymentResults
+                    .Any(p => p.OrderTableId == ot.OrderTableId && p.IsSuccess == true))
+                .Select(m => new DTO_OrderTable
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate
+                }).ToListAsync();
+            if (orderTables == null || orderTables.Count == 0)
+                return NotFound();
+            return Ok(orderTables);
+        }
+        // lấy thông tin đơn đặt bàn chưa thanh toán của 1 user
+        [HttpGet("user/unpaid/{userid}")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetUnPaidOrderTableByUserId(string userid)
+        {
+            var orderTables = await _context.OrderTables
+                .Where(ot => ot.UserId == userid)
+                .Where(ot => !_context.PaymentResults
+                    .Any(p => p.OrderTableId == ot.OrderTableId && p.IsSuccess == true))
+                .Select(m => new DTO_OrderTable
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate
+                }).ToListAsync();
+            if (orderTables == null || orderTables.Count == 0)
+                return NotFound();
+            return Ok(orderTables);
+        }
+        // lấy số lượng đơn đặt bàn đã hủy của 1 user
         [HttpGet("canceled/{id}")]
         public async Task<ActionResult<int>> GetOrderTableCanceledByUserId(string id)
         {
@@ -174,6 +224,7 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(count);
         }
+        // lấy số lượng đơn đặt bàn đã hủy
         [HttpGet("canceled")]
         public async Task<ActionResult<int>> GetAllOrderTableCanceled()
         {
