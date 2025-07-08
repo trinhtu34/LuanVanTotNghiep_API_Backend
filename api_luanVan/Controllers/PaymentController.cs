@@ -65,6 +65,16 @@ namespace api_LuanVan.Controllers
 
             return paymentResults;
         }
+        [HttpGet("ordertable/juststatus/{id}")]
+        public async Task<ActionResult<bool>> GetPaymentJustStatusByOrderTableId(long id)
+        {
+            var isPaid = await _context.PaymentResults
+                .AnyAsync(p => p.OrderTableId == id && p.IsSuccess == true);
+
+            return Ok(isPaid); // true nếu đã thanh toán, false nếu chưa
+        }
+
+
         [HttpGet("ordertable/status/{id}")]
         public async Task<ActionResult<IEnumerable<DTO_PaymentStatusOrderTable>>> GetPaymentStatusByOrderTableId(long id)
         {
