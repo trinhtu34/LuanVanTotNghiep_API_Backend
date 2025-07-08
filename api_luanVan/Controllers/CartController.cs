@@ -145,7 +145,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<int>> GetCartCountByUserId(string userid)
         {
             var count = await _context.Carts
-                .Where(c => c.UserId == userid)
+                .Where(c => c.UserId == userid && c.IsCancel == false)
                 .CountAsync();
             return Ok(count);
         }
@@ -154,7 +154,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<int>> GetPaidCartCountByUserId(string userid)
         {
             var count = await _context.Carts
-                .Where(c => c.UserId == userid)
+                .Where(c => c.UserId == userid && c.IsCancel == false)
                 .Where(c => _context.PaymentResults
                     .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
                 .CountAsync();
@@ -165,7 +165,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<int>> GetUnpaidCartCountByUserId(string userid)
         {
             var count = await _context.Carts
-                .Where(c => c.UserId == userid)
+                .Where(c => c.UserId == userid && c.IsCancel == false)
                 .Where(c => !_context.PaymentResults
                     .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
                 .CountAsync();
@@ -176,7 +176,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<decimal>> GetTotalPriceByUserId(string userId)
         {
             var totalPrice = await _context.Carts
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == userId && c.IsCancel == false)
                 .SumAsync(c => c.TotalPrice);
             return Ok(totalPrice);
         }
@@ -185,7 +185,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<decimal>> GetTotalPaidPriceByUserId(string userId)
         {
             var totalPrice = await _context.Carts
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == userId && c.IsCancel == false)
                 .Where(c => _context.PaymentResults
                     .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
                 .SumAsync(c => c.TotalPrice);
@@ -196,7 +196,7 @@ namespace api_LuanVan.Controllers
         public async Task<ActionResult<decimal>> GetTotalUnpaidPriceByUserId(string userId)
         {
             var totalPrice = await _context.Carts
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == userId && c.IsCancel == false)
                 .Where(c => !_context.PaymentResults
                     .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
                 .SumAsync(c => c.TotalPrice);
