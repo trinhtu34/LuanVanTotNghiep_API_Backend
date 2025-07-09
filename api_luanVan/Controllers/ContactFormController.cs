@@ -28,14 +28,9 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
 
-        [HttpGet("contactform/{userid}")]
-        public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsByUserId()
+        [HttpGet("{userid}")]
+        public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsByUserId(string userid)
         {
-            var userid = HttpContext.Request.Query["userid"].ToString();
-            if (string.IsNullOrEmpty(userid))
-            {
-                return BadRequest("User ID is required.");
-            }
             var contactForms = await _context.ContactForms
                 .Where(m => m.UserId == userid)
                 .Select(m => new DTO_ContactForm
@@ -66,7 +61,7 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             dto.ContactId = contactForm.ContactId;
             dto.CreateAt = contactForm.CreateAt;
-            return CreatedAtAction(nameof(GetContactForm), new { userid = dto.UserId }, dto);
+            return NoContent();
         }
     }
 }
