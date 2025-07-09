@@ -28,15 +28,24 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
 
-        [HttpGet("contactform/{userid}")]
-        public async Task<ActionResult<DTO_ContactForm>> GetContactForm(string userid)
+        [HttpGet("{userid}")]
+        public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsByUserId(string userid)
         {
-            var contactform = await _context.ContactForms.Where(m => m.UserId == userid).ToListAsync();
-            if (contactform == null || contactform.Count == 0)
-                return NotFound();
-            return Ok(contactform);
+            var contactForms = await _context.ContactForms
+                .Where(m => m.UserId == userid)
+                .Select(m => new DTO_ContactForm
+                {
+                    ContactId = m.ContactId,
+                    UserId = m.UserId,
+                    Content = m.Content,
+                    CreateAt = m.CreateAt
+                }).ToListAsync();
+            if (contactForms == null || !contactForms.Any())
+            {
+                return NotFound("No contact forms found for the specified user.");
+            }
+            return Ok(contactForms);
         }
-
         [HttpPost]
         public async Task<ActionResult<DTO_ContactForm>> CreateContactForm([FromBody] DTO_ContactForm dto)
         {
@@ -52,7 +61,7 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             dto.ContactId = contactForm.ContactId;
             dto.CreateAt = contactForm.CreateAt;
-            return CreatedAtAction(nameof(GetContactForm), new { userid = dto.UserId }, dto);
+            return NoContent();
         }
     }
 }
