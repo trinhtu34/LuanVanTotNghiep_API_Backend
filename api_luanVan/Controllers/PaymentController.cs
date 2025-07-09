@@ -38,6 +38,49 @@ namespace api_LuanVan.Controllers
                     TransactionStatusDescription = pr.TransactionStatusDescription
                 }).ToListAsync();
         }
+        [HttpGet("paymenthistory/ordertable")]
+        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetPaymentHistoryOrderTable()
+        {
+            var paymentResults = await _context.PaymentResults
+                .Where(pr => pr.OrderTableId != null)
+                .Select(pr => new DTO_Payment_ShowHistoryPayment_OrderTable
+                {
+                    PaymentResultId = pr.PaymentResultId,
+                    OrderTableId = pr.OrderTableId,
+                    Amount = pr.Amount,
+                    IsSuccess = pr.IsSuccess,
+                    Timestamp = pr.Timestamp,
+                    PaymentMethod = pr.PaymentMethod,
+                    BankCode = pr.BankCode,
+                    ResponseDescription = pr.ResponseDescription,
+                    TransactionStatusDescription = pr.TransactionStatusDescription
+                }).ToListAsync();
+            if (paymentResults == null || !paymentResults.Any())
+                return NotFound();
+            return paymentResults;
+        }
+        [HttpGet("paymenthistory/cart")]
+        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryCart()
+        {
+            var paymentResults = await _context.PaymentResults
+                .Where(pr => pr.CartId != null)
+                .Select(pr => new DTO_Payment_ShowHistoryPayment_Cart
+                {
+                    PaymentResultId = pr.PaymentResultId,
+                    CartId = pr.CartId,
+                    Amount = pr.Amount,
+                    IsSuccess = pr.IsSuccess,
+                    Timestamp = pr.Timestamp,
+                    PaymentMethod = pr.PaymentMethod,
+                    BankCode = pr.BankCode,
+                    ResponseDescription = pr.ResponseDescription,
+                    TransactionStatusDescription = pr.TransactionStatusDescription
+                }).ToListAsync();
+            if (paymentResults == null || !paymentResults.Any())
+                return NotFound();
+            return paymentResults;
+        }
+
         [HttpGet("ordertable/{id}")]
         public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetPaymentResultsByOrderTableId(long id)
         {
