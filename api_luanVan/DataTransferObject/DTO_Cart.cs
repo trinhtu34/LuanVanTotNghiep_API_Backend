@@ -34,5 +34,14 @@
         public bool IsPaid { get; set; } = false;
         public bool? IsFinish { get; set; }
     }
-
+    public class DTO_Cart_Cancel_Status
+    {
+        public long CartId { get; set; }
+        public bool? IsCancel { get; set; }
+    }
+    public class DTO_Cart_Finish_Status
+    {
+        public long CartId { get; set; }
+        public bool? IsFinish { get; set; }
+    }
 }
