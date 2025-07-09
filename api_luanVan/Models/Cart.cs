@@ -15,6 +15,8 @@ public partial class Cart
 
     public decimal? TotalPrice { get; set; }
 
+    public bool? IsFinish { get; set; }
+
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
     public virtual ICollection<PaymentResult> PaymentResults { get; set; } = new List<PaymentResult>();
