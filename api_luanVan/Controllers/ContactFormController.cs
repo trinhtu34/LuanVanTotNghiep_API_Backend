@@ -40,34 +40,18 @@ namespace api_LuanVan.Controllers
         [HttpPost]
         public async Task<ActionResult<DTO_ContactForm>> CreateContactForm([FromBody] DTO_ContactForm dto)
         {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
             var contactForm = new ContactForm
             {
                 UserId = dto.UserId,
                 Content = dto.Content,
-                CreateAt = DateTime.Now
+                CreateAt = currentTime
             };
             _context.ContactForms.Add(contactForm);
             await _context.SaveChangesAsync();
             dto.ContactId = contactForm.ContactId;
             return CreatedAtAction(nameof(GetContactForm), new { userid = dto.UserId }, dto);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<ActionResult<DTO_ContactForm>> UpdateContactForm(int id, [FromBody] DTO_ContactForm dto)
-        {
-            if (id != dto.ContactId)
-                return BadRequest();
-
-            var contactForm = await _context.ContactForms.FindAsync(id);
-            if (contactForm == null)
-                return NotFound();
-
-            //contactForm.UserId = dto.UserId;
-            contactForm.Content = dto.Content;
-            contactForm.CreateAt = DateTime.Now;
-            _context.Entry(contactForm).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return Ok(dto);
         }
     }
 }
