@@ -29,14 +29,28 @@ namespace api_LuanVan.Controllers
         }
 
         [HttpGet("contactform/{userid}")]
-        public async Task<ActionResult<DTO_ContactForm>> GetContactForm(string userid)
+        public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsByUserId()
         {
-            var contactform = await _context.ContactForms.Where(m => m.UserId == userid).ToListAsync();
-            if (contactform == null || contactform.Count == 0)
-                return NotFound();
-            return Ok(contactform);
+            var userid = HttpContext.Request.Query["userid"].ToString();
+            if (string.IsNullOrEmpty(userid))
+            {
+                return BadRequest("User ID is required.");
+            }
+            var contactForms = await _context.ContactForms
+                .Where(m => m.UserId == userid)
+                .Select(m => new DTO_ContactForm
+                {
+                    ContactId = m.ContactId,
+                    UserId = m.UserId,
+                    Content = m.Content,
+                    CreateAt = m.CreateAt
+                }).ToListAsync();
+            if (contactForms == null || !contactForms.Any())
+            {
+                return NotFound("No contact forms found for the specified user.");
+            }
+            return Ok(contactForms);
         }
-
         [HttpPost]
         public async Task<ActionResult<DTO_ContactForm>> CreateContactForm([FromBody] DTO_ContactForm dto)
         {
