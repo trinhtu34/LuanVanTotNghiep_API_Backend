@@ -129,7 +129,7 @@ namespace api_LuanVan.Controllers
 
         // api thay đổi trạng thái của 1 giỏ hàng 
         [HttpPut("state/{id}")]
-        public async Task<ActionResult<DTO_Cart>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart dto)
+        public async Task<ActionResult<DTO_Cart_Cancel_Status>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart_Cancel_Status dto)
         {
             var cart = await _context.Carts.FindAsync(id);
             if (cart == null)
