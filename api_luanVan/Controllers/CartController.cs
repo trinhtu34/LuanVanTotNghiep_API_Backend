@@ -129,7 +129,7 @@ namespace api_LuanVan.Controllers
 
         // api thay đổi trạng thái của 1 giỏ hàng 
         [HttpPut("state/{id}")]
-        public async Task<ActionResult<DTO_Cart_Cancel_Status>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart_Cancel_Status dto)
+        public async Task<ActionResult<DTO_Cart_Cancel_Status>> UpdateOrderTableByState(bool id, [FromBody] DTO_Cart_Cancel_Status dto)
         {
             var cart = await _context.Carts.FindAsync(id);
             if (cart == null)
@@ -143,7 +143,7 @@ namespace api_LuanVan.Controllers
 
         // api thay đổi trạng thái hoàn thành của 1 giỏ hàng 
         [HttpPut("stateFinish/{id}")]
-        public async Task<ActionResult<DTO_Cart_WithPaymentInfo_andIsFinish>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart_WithPaymentInfo_andIsFinish dto)
+        public async Task<ActionResult<DTO_Cart_WithPaymentInfo_andIsFinish>> UpdateOrderTableByState(bool id, [FromBody] DTO_Cart_WithPaymentInfo_andIsFinish dto)
         {
             var cart = await _context.Carts.FindAsync(id);
             if (cart == null)
