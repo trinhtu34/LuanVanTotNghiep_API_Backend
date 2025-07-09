@@ -51,6 +51,7 @@ namespace api_LuanVan.Controllers
             _context.ContactForms.Add(contactForm);
             await _context.SaveChangesAsync();
             dto.ContactId = contactForm.ContactId;
+            dto.CreateAt = contactForm.CreateAt;
             return CreatedAtAction(nameof(GetContactForm), new { userid = dto.UserId }, dto);
         }
     }
