@@ -30,4 +30,40 @@
 
         public string? TransactionStatusDescription { get; set; }
     }
+    public class DTO_Payment_OrderTable
+    {
+        public long PaymentResultId { get; set; }
+
+        public long? OrderTableId { get; set; }
+
+        public decimal? Amount { get; set; }
+
+        public long? PaymentId { get; set; }
+
+        public bool? IsSuccess { get; set; }
+
+        public string? Description { get; set; }
+
+        public DateTime? Timestamp { get; set; }
+
+        public string? PaymentMethod { get; set; }
+    }
+    public class DTO_Payment_Cart
+    {
+        public long PaymentResultId { get; set; }
+
+        public long? CartId { get; set; }
+
+        public decimal? Amount { get; set; }
+
+        public long? PaymentId { get; set; }
+
+        public bool? IsSuccess { get; set; }
+
+        public string? Description { get; set; }
+
+        public DateTime? Timestamp { get; set; }
+
+        public string? PaymentMethod { get; set; }
+    }
 }

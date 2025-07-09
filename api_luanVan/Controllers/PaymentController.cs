@@ -131,5 +131,57 @@ namespace api_LuanVan.Controllers
             return NoContent();
         }
 
+        [HttpPost("admin/ordertable/{ordertableid}")]
+        public async Task<ActionResult<DTO_Payment_OrderTable>> CreatePaymentResultForOrderTable(long ordertableid, DTO_Payment_OrderTable paymentDto)
+        {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            var paymentid = DateTime.Now.Ticks;
+            var orderTable = await _context.OrderTables.FindAsync(ordertableid);
+            if (orderTable == null)
+            {
+                return NotFound("Order table not found.");
+            }
+            var paymentResult = new PaymentResult
+            {
+                OrderTableId = ordertableid,
+                Amount = paymentDto.Amount,
+                PaymentId = paymentid,
+                IsSuccess = true,
+                Description = $"Thanh toán tiền mặt cho đơn đặt bàn : {ordertableid}",
+                Timestamp = currentTime,
+                PaymentMethod = "Cash"
+            };
+            _context.PaymentResults.Add(paymentResult);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPost("admin/cart/{cartid}")]
+        public async Task<ActionResult<DTO_Payment_Cart>> CreatePaymentResultForCart(long cartid, DTO_Payment_Cart paymentDto)
+        {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            var paymentid = DateTime.Now.Ticks;
+            var cart = await _context.Carts.FindAsync(cartid);
+            if (cart == null)
+            {
+                return NotFound("Cart not found.");
+            }
+            var paymentResult = new PaymentResult
+            {
+                CartId = cartid,
+                Amount = paymentDto.Amount,
+                PaymentId = paymentid,
+                IsSuccess = true,
+                Description = $"Thanh toán tiền mặt cho đơn hàng : {cartid}",
+                Timestamp = currentTime,
+                PaymentMethod = "Cash"
+            };
+            _context.PaymentResults.Add(paymentResult);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
     }
 }
