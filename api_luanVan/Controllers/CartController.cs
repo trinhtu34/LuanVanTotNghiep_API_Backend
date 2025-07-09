@@ -33,37 +33,43 @@ namespace api_LuanVan.Controllers
             return Ok(cartItems);
         }
 
+        // lấy tất cả thông tin giỏ hàng , kèm theo thông tin thanh toán và trạng thái hoàn thành
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetAllCarts()
+        public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetAllCarts()
         {
             var cartItems = await _context.Carts
-                .Select(c => new DTO_Cart
+                .Select(c => new DTO_Cart_WithPaymentInfo_andIsFinish
                 {
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = c.OrderTime,
                     TotalPrice = c.TotalPrice,
-                    IsCancel = c.IsCancel
+                    IsCancel = c.IsCancel,
+                    IsFinish = c.IsFinish,
+                    IsPaid = _context.PaymentResults.Any(p => p.CartId == c.CartId && p.IsSuccess == true)
                 }).ToListAsync();
             if (cartItems == null || cartItems.Count == 0)
                 return NotFound();
             return Ok(cartItems);
         }
-        // lấy thông tin giỏ hàng từ 1 tiếng trước trở về sau 
+
+        // lấy thông tin giỏ hàng từ 2 tiếng trước trở về sau 
         [HttpGet("afterCurrentOrderTime")]
-        public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetCartsAfterCurrentOrderTime()
+        public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetCartsAfterCurrentOrderTime()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-2);
             var cartItems = await _context.Carts
                 .Where(c => c.OrderTime > currentTime && c.IsCancel == false)
-                .Select(c => new DTO_Cart
+                .Select(c => new DTO_Cart_WithPaymentInfo_andIsFinish
                 {
                     CartId = c.CartId,
                     UserId = c.UserId,
                     OrderTime = c.OrderTime,
                     TotalPrice = c.TotalPrice,
-                    IsCancel = c.IsCancel
+                    IsCancel = c.IsCancel,
+                    IsFinish = c.IsFinish,
+                    IsPaid = _context.PaymentResults.Any(p => p.CartId == c.CartId && p.IsSuccess == true)
                 }).ToListAsync();
             if (cartItems == null || cartItems.Count == 0)
                 return NotFound();
@@ -112,14 +118,9 @@ namespace api_LuanVan.Controllers
         [HttpPut("{cartId}")]
         public async Task<IActionResult> UpdateCart(int cartId, DTO_Cart dtoCart)
         {
-            if (cartId != dtoCart.CartId)
-                return BadRequest("Cart ID mismatch");
             var existingCart = await _context.Carts.FindAsync(cartId);
             if (existingCart == null)
                 return NotFound();
-            existingCart.UserId = dtoCart.UserId;
-            existingCart.OrderTime = dtoCart.OrderTime;
-            existingCart.TotalPrice = dtoCart.TotalPrice;
             existingCart.IsCancel = dtoCart.IsCancel;
             _context.Entry(existingCart).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -135,6 +136,20 @@ namespace api_LuanVan.Controllers
                 return NotFound();
 
             cart.IsCancel = dto.IsCancel;
+            _context.Entry(cart).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // api thay đổi trạng thái hoàn thành của 1 giỏ hàng 
+        [HttpPut("stateFinish/{id}")]
+        public async Task<ActionResult<DTO_Cart_WithPaymentInfo_andIsFinish>> UpdateOrderTableByState(long id, [FromBody] DTO_Cart_WithPaymentInfo_andIsFinish dto)
+        {
+            var cart = await _context.Carts.FindAsync(id);
+            if (cart == null)
+                return NotFound();
+
+            cart.IsFinish = dto.IsFinish;
             _context.Entry(cart).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
@@ -205,47 +220,47 @@ namespace api_LuanVan.Controllers
 
 
 
-        // Lấy thông tin giỏ hàng đã thanh toán của người dùng theo userId
-        [HttpGet("user/paid/{userid}")]
-        public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetPaidCartsByUserId(string userId)
-        {
-            var cartItems = await _context.Carts
-                .Where(c => c.UserId == userId)
-                .Where(c => _context.PaymentResults
-                    .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
-                .Select(c => new DTO_Cart
-                {
-                    CartId = c.CartId,
-                    UserId = c.UserId,
-                    OrderTime = c.OrderTime,
-                    TotalPrice = c.TotalPrice,
-                    IsCancel = c.IsCancel
-                }).ToListAsync();
-            if (cartItems == null || cartItems.Count == 0)
-                return NotFound();
-            return Ok(cartItems);
-        }
+        //// Lấy thông tin giỏ hàng đã thanh toán của người dùng theo userId
+        //[HttpGet("user/paid/{userid}")]
+        //public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetPaidCartsByUserId(string userId)
+        //{
+        //    var cartItems = await _context.Carts
+        //        .Where(c => c.UserId == userId)
+        //        .Where(c => _context.PaymentResults
+        //            .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
+        //        .Select(c => new DTO_Cart
+        //        {
+        //            CartId = c.CartId,
+        //            UserId = c.UserId,
+        //            OrderTime = c.OrderTime,
+        //            TotalPrice = c.TotalPrice,
+        //            IsCancel = c.IsCancel
+        //        }).ToListAsync();
+        //    if (cartItems == null || cartItems.Count == 0)
+        //        return NotFound();
+        //    return Ok(cartItems);
+        //}
 
-        // Lấy thông tin giỏ hàng chưa thanh toán của người dùng theo userId
-        [HttpGet("user/unpaid/{userid}")]
-        public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetUnpaidCartsByUserId(string userId)
-        {
-            var cartItems = await _context.Carts
-                .Where(c => c.UserId == userId)
-                .Where(c => !_context.PaymentResults
-                    .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
-                .Select(c => new DTO_Cart
-                {
-                    CartId = c.CartId,
-                    UserId = c.UserId,
-                    OrderTime = c.OrderTime,
-                    TotalPrice = c.TotalPrice,
-                    IsCancel = c.IsCancel
-                }).ToListAsync();
-            if (cartItems == null || cartItems.Count == 0)
-                return NotFound();
-            return Ok(cartItems);
-        }
+        //// Lấy thông tin giỏ hàng chưa thanh toán của người dùng theo userId
+        //[HttpGet("user/unpaid/{userid}")]
+        //public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetUnpaidCartsByUserId(string userId)
+        //{
+        //    var cartItems = await _context.Carts
+        //        .Where(c => c.UserId == userId)
+        //        .Where(c => !_context.PaymentResults
+        //            .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
+        //        .Select(c => new DTO_Cart
+        //        {
+        //            CartId = c.CartId,
+        //            UserId = c.UserId,
+        //            OrderTime = c.OrderTime,
+        //            TotalPrice = c.TotalPrice,
+        //            IsCancel = c.IsCancel
+        //        }).ToListAsync();
+        //    if (cartItems == null || cartItems.Count == 0)
+        //        return NotFound();
+        //    return Ok(cartItems);
+        //}
 
     }
 }
