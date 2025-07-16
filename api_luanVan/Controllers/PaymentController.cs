@@ -73,7 +73,7 @@ namespace api_LuanVan.Controllers
             {
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-                var query = _context.PaymentResults.Where(p => p.CartId != null);
+                var query = _context.PaymentResults.Where(p => p.OrderTableId != null);
 
                 if (fromDate.HasValue)
                 {
