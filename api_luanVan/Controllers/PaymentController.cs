@@ -59,6 +59,53 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return paymentResults;
         }
+        [HttpGet("paymenthistory/ordertable/filter")]
+        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetOrdertablePaymentHistoryWithFilters(
+            [FromQuery] DateTime? fromDate = null , 
+            [FromQuery] DateTime? toDate = null , 
+            [FromQuery] bool? filterBySuccess = null)
+        {
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var query = _context.PaymentResults.Where(p => p.OrderTableId != null);
+
+                if (fromDate.HasValue)
+                {
+                    var fromUtc = TimeZoneInfo.ConvertTimeFromUtc(fromDate.Value, vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp >= fromUtc);
+                }
+                if (toDate.HasValue)
+                {
+                    var toUtc = TimeZoneInfo.ConvertTimeFromUtc(toDate.Value, vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp <= toUtc);
+                }
+                if (filterBySuccess != null)
+                {
+                    query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
+                }
+                var totalRecords = await query.CountAsync();
+                var result = query
+                    .OrderByDescending(p => p.Timestamp)
+                    .Select(pr => new DTO_Payment_ShowHistoryPayment_OrderTable
+                    {
+                        PaymentResultId = pr.PaymentResultId,
+                        OrderTableId = pr.OrderTableId,
+                        Amount = pr.Amount,
+                        IsSuccess = pr.IsSuccess,
+                        Timestamp = pr.Timestamp,
+                        PaymentMethod = pr.PaymentMethod,
+                        BankCode = pr.BankCode,
+                        ResponseDescription = pr.ResponseDescription,
+                        TransactionStatusDescription = pr.TransactionStatusDescription
+                    })
+                    .ToListAsync();
+                return Ok(result);
+            }
+            catch (Exception ex) {
+                return BadRequest();
+            }
+        }
         [HttpGet("paymenthistory/cart")]
         public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryCart()
         {
@@ -96,7 +143,6 @@ namespace api_LuanVan.Controllers
 
                 var query = _context.PaymentResults.Where(p => p.CartId != null);
 
-                // Filter theo ngày
                 if (fromDate.HasValue)
                 {
                     var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate.Value, vietnamTimeZone);
@@ -109,25 +155,19 @@ namespace api_LuanVan.Controllers
                     query = query.Where(p => p.Timestamp <= toUtc);
                 }
 
-                // Filter theo trạng thái thành công
                 if (filterBySuccess.HasValue)
                 {
                     query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
                 }
 
-                // Filter theo phương thức thanh toán (nếu cần)
                 if (!string.IsNullOrEmpty(paymentMethod))
                 {
                     query = query.Where(p => p.PaymentMethod.Contains(paymentMethod));
                 }
-
-                // Filter theo mã ngân hàng (nếu cần)
                 if (!string.IsNullOrEmpty(bankCode))
                 {
                     query = query.Where(p => p.BankCode.Contains(bankCode));
                 }
-
-                // Phân trang (tùy chọn)
                 var totalRecords = await query.CountAsync();
                 var results = await query
                     .OrderByDescending(p => p.Timestamp)
@@ -147,7 +187,7 @@ namespace api_LuanVan.Controllers
                     })
                     .ToListAsync();
 
-                // Thêm thông tin phân trang trong header (nếu cần)
+                // phân trang , nhưng đang lỗi để làm sau 
                 Response.Headers.Add("X-Total-Count", totalRecords.ToString());
                 Response.Headers.Add("X-Page-Number", pageNumber.ToString());
                 Response.Headers.Add("X-Page-Size", pageSize.ToString());
@@ -160,7 +200,7 @@ namespace api_LuanVan.Controllers
             }
         }
 
-        // API lấy thống kê theo filter
+        // api thống kê số liệu theo filter
         [HttpGet("paymenthistory/cart/statistics")]
         public async Task<ActionResult<object>> GetPaymentStatistics(
             [FromQuery] DateTime? fromDate = null,
@@ -231,6 +271,7 @@ namespace api_LuanVan.Controllers
                 return BadRequest($"Lỗi: {ex.Message}");
             }
         }
+
         [HttpGet("ordertable/{id}")]
         public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetPaymentResultsByOrderTableId(long id)
         {
