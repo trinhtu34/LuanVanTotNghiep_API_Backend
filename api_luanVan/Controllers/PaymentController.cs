@@ -61,49 +61,74 @@ namespace api_LuanVan.Controllers
         }
         [HttpGet("paymenthistory/ordertable/filter")]
         public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetOrdertablePaymentHistoryWithFilters(
-            [FromQuery] DateTime? fromDate = null , 
-            [FromQuery] DateTime? toDate = null , 
-            [FromQuery] bool? filterBySuccess = null)
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] bool? filterBySuccess = null,
+            [FromQuery] string? paymentMethod = null,
+            [FromQuery] string? bankCode = null,
+            [FromQuery] int pageSize = 50,
+            [FromQuery] int pageNumber = 1)
         {
             try
             {
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                var query = _context.PaymentResults.Where(p => p.OrderTableId != null);
+
+                var query = _context.PaymentResults.Where(p => p.CartId != null);
 
                 if (fromDate.HasValue)
                 {
-                    var fromUtc = TimeZoneInfo.ConvertTimeFromUtc(fromDate.Value, vietnamTimeZone);
+                    var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate.Value, vietnamTimeZone);
                     query = query.Where(p => p.Timestamp >= fromUtc);
                 }
+
                 if (toDate.HasValue)
                 {
-                    var toUtc = TimeZoneInfo.ConvertTimeFromUtc(toDate.Value, vietnamTimeZone);
+                    var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.Value.AddDays(1).AddSeconds(-1), vietnamTimeZone);
                     query = query.Where(p => p.Timestamp <= toUtc);
                 }
-                if (filterBySuccess != null)
+
+                if (filterBySuccess.HasValue)
                 {
                     query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
                 }
+
+                if (!string.IsNullOrEmpty(paymentMethod))
+                {
+                    query = query.Where(p => p.PaymentMethod.Contains(paymentMethod));
+                }
+                if (!string.IsNullOrEmpty(bankCode))
+                {
+                    query = query.Where(p => p.BankCode.Contains(bankCode));
+                }
                 var totalRecords = await query.CountAsync();
-                var result = query
+                var results = await query
                     .OrderByDescending(p => p.Timestamp)
-                    .Select(pr => new DTO_Payment_ShowHistoryPayment_OrderTable
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new DTO_Payment_ShowHistoryPayment_OrderTable
                     {
-                        PaymentResultId = pr.PaymentResultId,
-                        OrderTableId = pr.OrderTableId,
-                        Amount = pr.Amount,
-                        IsSuccess = pr.IsSuccess,
-                        Timestamp = pr.Timestamp,
-                        PaymentMethod = pr.PaymentMethod,
-                        BankCode = pr.BankCode,
-                        ResponseDescription = pr.ResponseDescription,
-                        TransactionStatusDescription = pr.TransactionStatusDescription
+                        PaymentResultId = p.PaymentResultId,
+                        OrderTableId = p.OrderTableId,
+                        Amount = p.Amount,
+                        IsSuccess = p.IsSuccess ?? false,
+                        Timestamp = p.Timestamp ?? DateTime.MinValue,
+                        PaymentMethod = p.PaymentMethod,
+                        BankCode = p.BankCode,
+                        ResponseDescription = p.ResponseDescription,
+                        TransactionStatusDescription = p.TransactionStatusDescription
                     })
                     .ToListAsync();
-                return Ok(result);
+
+                // phân trang , nhưng đang lỗi để làm sau 
+                Response.Headers.Add("X-Total-Count", totalRecords.ToString());
+                Response.Headers.Add("X-Page-Number", pageNumber.ToString());
+                Response.Headers.Add("X-Page-Size", pageSize.ToString());
+
+                return Ok(results);
             }
-            catch (Exception ex) {
-                return BadRequest();
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi: {ex.Message}");
             }
         }
         [HttpGet("paymenthistory/cart")]
