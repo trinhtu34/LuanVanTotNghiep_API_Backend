@@ -80,7 +80,157 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return paymentResults;
         }
+        [HttpGet("paymenthistory/cart/filter")]
+        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryWithFilters(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] bool? filterBySuccess = null,
+            [FromQuery] string? paymentMethod = null,
+            [FromQuery] string? bankCode = null,
+            [FromQuery] int pageSize = 50,
+            [FromQuery] int pageNumber = 1)
+        {
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+                var query = _context.PaymentResults.Where(p => p.CartId != null);
+
+                // Filter theo ngày
+                if (fromDate.HasValue)
+                {
+                    var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate.Value, vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp >= fromUtc);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.Value.AddDays(1).AddSeconds(-1), vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp <= toUtc);
+                }
+
+                // Filter theo trạng thái thành công
+                if (filterBySuccess.HasValue)
+                {
+                    query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
+                }
+
+                // Filter theo phương thức thanh toán (nếu cần)
+                if (!string.IsNullOrEmpty(paymentMethod))
+                {
+                    query = query.Where(p => p.PaymentMethod.Contains(paymentMethod));
+                }
+
+                // Filter theo mã ngân hàng (nếu cần)
+                if (!string.IsNullOrEmpty(bankCode))
+                {
+                    query = query.Where(p => p.BankCode.Contains(bankCode));
+                }
+
+                // Phân trang (tùy chọn)
+                var totalRecords = await query.CountAsync();
+                var results = await query
+                    .OrderByDescending(p => p.Timestamp)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new DTO_Payment_ShowHistoryPayment_Cart
+                    {
+                        PaymentResultId = p.PaymentResultId,
+                        CartId = p.CartId,
+                        Amount = p.Amount,
+                        IsSuccess = p.IsSuccess ?? false,
+                        Timestamp = p.Timestamp ?? DateTime.MinValue,
+                        PaymentMethod = p.PaymentMethod,
+                        BankCode = p.BankCode,
+                        ResponseDescription = p.ResponseDescription,
+                        TransactionStatusDescription = p.TransactionStatusDescription
+                    })
+                    .ToListAsync();
+
+                // Thêm thông tin phân trang trong header (nếu cần)
+                Response.Headers.Add("X-Total-Count", totalRecords.ToString());
+                Response.Headers.Add("X-Page-Number", pageNumber.ToString());
+                Response.Headers.Add("X-Page-Size", pageSize.ToString());
+
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi: {ex.Message}");
+            }
+        }
+
+        // API lấy thống kê theo filter
+        [HttpGet("paymenthistory/cart/statistics")]
+        public async Task<ActionResult<object>> GetPaymentStatistics(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] bool? filterBySuccess = null)
+        {
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+                var query = _context.PaymentResults.Where(p => p.CartId != null);
+
+                if (fromDate.HasValue)
+                {
+                    var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate.Value, vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp >= fromUtc);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.Value.AddDays(1).AddSeconds(-1), vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp <= toUtc);
+                }
+
+                if (filterBySuccess.HasValue)
+                {
+                    query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
+                }
+
+                var statistics = await query
+                    .GroupBy(p => 1)
+                    .Select(g => new
+                    {
+                        TotalTransactions = g.Count(),
+                        TotalAmount = g.Sum(p => p.Amount ?? 0),
+                        SuccessCount = g.Count(p => p.IsSuccess == true),
+                        FailCount = g.Count(p => p.IsSuccess == false),
+                        SuccessRate = g.Count() > 0 ? (double)g.Count(p => p.IsSuccess == true) / g.Count() * 100 : 0,
+                        SuccessAmount = g.Where(p => p.IsSuccess == true).Sum(p => p.Amount ?? 0),
+                        PaymentMethods = g.GroupBy(p => p.PaymentMethod)
+                            .Select(pm => new { Method = pm.Key, Count = pm.Count() })
+                            .OrderByDescending(pm => pm.Count),
+                        BankCodes = g.GroupBy(p => p.BankCode)
+                            .Select(bc => new { Bank = bc.Key, Count = bc.Count() })
+                            .OrderByDescending(bc => bc.Count)
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (statistics == null)
+                {
+                    return Ok(new
+                    {
+                        TotalTransactions = 0,
+                        TotalAmount = 0,
+                        SuccessCount = 0,
+                        FailCount = 0,
+                        SuccessRate = 0,
+                        SuccessAmount = 0,
+                        PaymentMethods = new List<object>(),
+                        BankCodes = new List<object>()
+                    });
+                }
+
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi: {ex.Message}");
+            }
+        }
         [HttpGet("ordertable/{id}")]
         public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetPaymentResultsByOrderTableId(long id)
         {

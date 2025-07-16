@@ -1,8 +1,10 @@
 ﻿using api_LuanVan.DataTransferObject;
 using api_LuanVan.Models;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace api_LuanVan.Controllers
 {
@@ -76,6 +78,56 @@ namespace api_LuanVan.Controllers
             return Ok(cartItems);
         }
 
+        // api lấy thông tin giỏ hàng từ thời gian trong tuần này ( monday to sunday )
+        // api lấy thông tin giỏ hàng từ thời gian trong tháng này ( 1st to last day of month ) 
+        // api lấy thông tin giỏ hàng từ thời gian trong quý này 
+        // api lấy thông tin giỏ hàng từ thời gian trong năm này ( 1st Jan to 31st Dec )
+
+
+        // api lấy thông tin giỏ hàng từ 2 khoảng thời gian input 
+        [HttpGet("byTimestampRange")]
+        public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetCartsByTimestampRange(
+            [FromQuery] DateTime fromDate,
+            [FromQuery] DateTime toDate)
+        {
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+                // Chuyển đổi thời gian input sang UTC để so sánh với database
+                var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate, vietnamTimeZone);
+                var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.AddDays(1).AddSeconds(-1), vietnamTimeZone); // Đến cuối ngày
+
+                var cartItems = await _context.Carts
+                    .Where(c => c.IsCancel == false &&
+                               _context.PaymentResults.Any(p => p.CartId == c.CartId && p.Timestamp >= fromUtc && p.Timestamp <= toUtc))
+                    .Select(c => new DTO_Cart_WithPaymentInfo_andIsFinish
+                    {
+                        CartId = c.CartId,
+                        UserId = c.UserId,
+                        OrderTime = c.OrderTime,
+                        TotalPrice = c.TotalPrice,
+                        IsCancel = c.IsCancel,
+                        IsFinish = c.IsFinish,
+                        IsPaid = _context.PaymentResults.Any(p => p.CartId == c.CartId && p.IsSuccess == true),
+                        //PaymentTimestamp = _context.PaymentResults
+                        //    .Where(p => p.CartId == c.CartId && p.Timestamp >= fromUtc && p.Timestamp <= toUtc)
+                        //    .OrderByDescending(p => p.Timestamp)
+                        //    .Select(p => p.Timestamp)
+                        //    .FirstOrDefault()
+                    })
+                    .ToListAsync();
+
+                if (cartItems == null || cartItems.Count == 0)
+                    return NotFound($"Không tìm thấy giỏ hàng nào có thanh toán từ {fromDate:dd/MM/yyyy} đến {toDate:dd/MM/yyyy}");
+
+                return Ok(cartItems);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi: {ex.Message}");
+            }
+        }
         // lấy thông tin giỏ hàng theo mã giỏ hàng 
         [HttpGet("{cartId}")]
         public async Task<ActionResult<DTO_Cart>> GetCartById(int cartId)
@@ -176,7 +228,7 @@ namespace api_LuanVan.Controllers
             return Ok(count);
         }
         // đếm số lượng giỏ hàng chưa thanh toán của 1 user id
-        [HttpGet("user/unpaid/count/{userid}")] 
+        [HttpGet("user/unpaid/count/{userid}")]
         public async Task<ActionResult<int>> GetUnpaidCartCountByUserId(string userid)
         {
             var count = await _context.Carts

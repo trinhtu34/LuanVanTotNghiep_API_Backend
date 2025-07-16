@@ -55,7 +55,7 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
 
             if (orderTables == null || orderTables.Count == 0)
-                return NotFound();
+                return NoContent();
 
             return Ok(orderTables);
         }
