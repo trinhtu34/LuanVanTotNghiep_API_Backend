@@ -29,6 +29,25 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
 
+        [HttpGet("contactid/{contactid}")]
+        public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsById(string contactid)
+        {
+            var contactForms = await _context.ContactForms
+                .Where(m => m.ContactId.ToString() == contactid)
+                .Select(m => new DTO_ContactForm
+                {
+                    ContactId = m.ContactId,
+                    UserId = m.UserId,
+                    Content = m.Content,
+                    CreateAt = m.CreateAt
+                }).ToListAsync();
+            if (contactForms == null || !contactForms.Any())
+            {
+                return NotFound("No contact forms found with the specified ID.");
+            }
+            return Ok(contactForms);
+        }
+
         [HttpGet("{userid}")]
         public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetAllContactFormsByUserId(string userid)
         {
@@ -47,7 +66,7 @@ namespace api_LuanVan.Controllers
             }
             return Ok(contactForms);
         }
-        [HttpGet("contactform/filter")]
+        [HttpGet("filter")]
         public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetContactFormWithFilters(
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
@@ -120,7 +139,7 @@ namespace api_LuanVan.Controllers
             }
         }
 
-        [HttpGet("contactform/filter/sub")]
+        [HttpGet("filter/sub")]
         public async Task<ActionResult<IEnumerable<DTO_ContactForm>>> GetContactFormWithFilters(
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
