@@ -81,6 +81,7 @@ namespace api_LuanVan.Controllers
             return Ok(orderTables);
         }
         // lấy thông tin đơn đặt bàn theo id
+        // this function is without payment status
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
@@ -95,6 +96,27 @@ namespace api_LuanVan.Controllers
                     TotalPrice = m.TotalPrice,
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate
+                }).ToListAsync();
+            if (orderTable == null || orderTable.Count == 0)
+                return Ok();
+            return Ok(orderTable);
+        }
+        // lấy thông tin đơn đặt bàn theo id có cả trạng thái thanh toán , cái này dùng để cho việc sửa chức năng đặt bàn sau khi báo cáo xong luận văn 
+        [HttpGet("includepaymentstatus/{userid}")]
+        public async Task<ActionResult<DTO_OrderTable_Paymentstatus>> GetOrderTableByUserIDHaveStatus(string userid)
+        {
+            var orderTable = await _context.OrderTables
+                .Where(m => m.UserId == userid)
+                .Select(m => new DTO_OrderTable_Paymentstatus
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate,
+                    IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
                 }).ToListAsync();
             if (orderTable == null || orderTable.Count == 0)
                 return Ok();
