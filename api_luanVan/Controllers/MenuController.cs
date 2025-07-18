@@ -203,7 +203,7 @@ namespace api_LuanVan.Controllers
                 Images = menu.Images
             };
         }
-        // method này chỉ dành cho admin để chỉnh sửa menu
+        // method này chỉ dành cho admin để chỉnh sửa menu , nó trả về cả thuộc tính isAvailable
         [HttpGet("admin/edit/{id}")]
         public async Task<ActionResult<DTO_MenuFull>> GetMenuForEdit(string id)
         {
@@ -227,7 +227,7 @@ namespace api_LuanVan.Controllers
             };
         }
 
-        // thử nghiệm là thêm thuộc tính isAvailable vào DTO_MenuFull , không làm thay đổi các phương thức get ở trên
+        // thử nghiệm là thêm thuộc tính isAvailable vào DTO_MenuFull , không làm thay đổi các phương thức get ở trên , vì thuộc tính isAvailable này được thêm vào 1 thời gian sau khi project đã chạy , nên mới phải làm như vậy
         [HttpPost]
         public async Task<ActionResult<DTO_MenuWithoutAvailabel>> CreateMenu([FromBody] DTO_MenuWithoutAvailabel dto)
         {
