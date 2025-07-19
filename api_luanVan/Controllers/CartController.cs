@@ -34,6 +34,25 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(cartItems);
         }
+        [HttpGet("user/includepaymentandfinish/{userId}")]
+        public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetCartByUserIdWithPaymentandFinish(string userId)
+        {
+            var cartItems = await _context.Carts
+                .Where(c => c.UserId == userId)
+                .Select(c => new DTO_Cart_WithPaymentInfo_andIsFinish
+                {
+                    CartId = c.CartId,
+                    UserId = c.UserId,
+                    OrderTime = c.OrderTime,
+                    TotalPrice = c.TotalPrice,
+                    IsCancel = c.IsCancel,
+                    IsFinish = c.IsFinish,
+                    IsPaid = _context.PaymentResults.Any(p => p.CartId == c.CartId && p.IsSuccess == true)
+                }).ToListAsync();
+            if (cartItems == null || cartItems.Count == 0)
+                return NoContent();
+            return Ok(cartItems);
+        }
 
         // lấy tất cả thông tin giỏ hàng , kèm theo thông tin thanh toán và trạng thái hoàn thành
         [HttpGet]

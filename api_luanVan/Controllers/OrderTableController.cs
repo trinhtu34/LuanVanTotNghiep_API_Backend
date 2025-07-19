@@ -82,6 +82,7 @@ namespace api_LuanVan.Controllers
         }
         // lấy thông tin đơn đặt bàn theo id
         // this function is without payment status
+        // hiện tại không còn dùng nữa vì đã có api trả về đơn đặt bàn kèm trạng thái thanh toán                                 XXXXX LƯU Ý !
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
@@ -101,6 +102,7 @@ namespace api_LuanVan.Controllers
                 return Ok();
             return Ok(orderTable);
         }
+
         // lấy thông tin đơn đặt bàn theo id có cả trạng thái thanh toán , cái này dùng để cho việc sửa chức năng đặt bàn sau khi báo cáo xong luận văn 
         [HttpGet("includepaymentstatus/{userid}")]
         public async Task<ActionResult<DTO_OrderTable_Paymentstatus>> GetOrderTableByUserIDHaveStatus(string userid)
