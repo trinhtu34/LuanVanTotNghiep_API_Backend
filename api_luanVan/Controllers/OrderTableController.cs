@@ -32,7 +32,32 @@ namespace api_LuanVan.Controllers
                 }).ToListAsync();
         }
 
-        // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau 
+        // lấy tất cả đơn đặt bàn từ 3 tiếng trước trở về sau , không kèm thông tin thanh toán 
+        [HttpGet("afterStartingTime3HoursAgo")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime3HoursAgo()
+        {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-3);
+
+            var orderTables = await _context.OrderTables
+                .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
+                .Select(m => new DTO_OrderTable
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate
+                }).ToListAsync();
+
+            if (orderTables == null || orderTables.Count == 0)
+                return NoContent();
+
+            return Ok(orderTables);
+        }
+        // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau có kèm thông tin thanh toán 
         [HttpGet("afterCurrentStartingTime")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTableAfterCurrentStartingTime()
         {
