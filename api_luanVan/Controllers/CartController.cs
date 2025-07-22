@@ -289,49 +289,93 @@ namespace api_LuanVan.Controllers
             return Ok(totalPrice);
         }
 
+        // api lấy doanh thu của món ăn theo khoảng thời gian và loại món ăn 
+        [HttpGet("dish-revenue")]
+        public async Task<ActionResult> GetDishRevenue(
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int? categoryId = null)
+        {
+            var query = _context.OrderFoodDetails
+                .Include(ofd => ofd.Dish)
+                .ThenInclude(d => d.Category)
+                .Include(ofd => ofd.OrderTable)
+                .ThenInclude(ot => ot.PaymentResults)
+                .Where(ofd => ofd.OrderTable.IsCancel != true &&
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
 
+            // lọc theo ngày , kiểu như là từ ngày A đến ngày B 
+            if (startDate.HasValue)
+                query = query.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
 
-        //// Lấy thông tin giỏ hàng đã thanh toán của người dùng theo userId
-        //[HttpGet("user/paid/{userid}")]
-        //public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetPaidCartsByUserId(string userId)
-        //{
-        //    var cartItems = await _context.Carts
-        //        .Where(c => c.UserId == userId)
-        //        .Where(c => _context.PaymentResults
-        //            .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
-        //        .Select(c => new DTO_Cart
-        //        {
-        //            CartId = c.CartId,
-        //            UserId = c.UserId,
-        //            OrderTime = c.OrderTime,
-        //            TotalPrice = c.TotalPrice,
-        //            IsCancel = c.IsCancel
-        //        }).ToListAsync();
-        //    if (cartItems == null || cartItems.Count == 0)
-        //        return NotFound();
-        //    return Ok(cartItems);
-        //}
+            if (endDate.HasValue)
+                query = query.Where(ofd => ofd.OrderTable.OrderDate <= endDate.Value);
 
-        //// Lấy thông tin giỏ hàng chưa thanh toán của người dùng theo userId
-        //[HttpGet("user/unpaid/{userid}")]
-        //public async Task<ActionResult<IEnumerable<DTO_Cart>>> GetUnpaidCartsByUserId(string userId)
-        //{
-        //    var cartItems = await _context.Carts
-        //        .Where(c => c.UserId == userId)
-        //        .Where(c => !_context.PaymentResults
-        //            .Any(p => p.CartId == c.CartId && p.IsSuccess == true))
-        //        .Select(c => new DTO_Cart
-        //        {
-        //            CartId = c.CartId,
-        //            UserId = c.UserId,
-        //            OrderTime = c.OrderTime,
-        //            TotalPrice = c.TotalPrice,
-        //            IsCancel = c.IsCancel
-        //        }).ToListAsync();
-        //    if (cartItems == null || cartItems.Count == 0)
-        //        return NotFound();
-        //    return Ok(cartItems);
-        //}
+            // lọc theo loại món ăn 
+            if (categoryId.HasValue)
+                query = query.Where(ofd => ofd.Dish.CategoryId == categoryId.Value);
+
+            var dishRevenue = await query
+                .GroupBy(ofd => new {
+                    ofd.DishId,
+                    ofd.Dish.DishName,
+                    ofd.Dish.Category.CategoryName,
+                    ofd.Dish.Price
+                })
+                .Select(g => new 
+                {
+                    DishId = g.Key.DishId,
+                    DishName = g.Key.DishName,
+                    CategoryName = g.Key.CategoryName,
+                    UnitPrice = g.Key.Price,
+                    TotalQuantitySold = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Price),
+                    OrderCount = g.Count()
+                })
+                .OrderByDescending(x => x.TotalRevenue)
+                .ToListAsync();
+            return Ok(dishRevenue);
+        }
+
+        // lấy thông tin doanh thu theo loại món ăn theo thời gian , ý là in ra loại món ăn và doanh thu của nó 
+        [HttpGet("revenue-by-category")]
+        public async Task<ActionResult> GetRevenueByCategory(
+         [FromQuery] DateTime? startDate = null,
+         [FromQuery] DateTime? endDate = null)
+        {
+            var query = _context.OrderFoodDetails
+                .Include(ofd => ofd.Dish)
+                .ThenInclude(d => d.Category)
+                .Include(ofd => ofd.OrderTable)
+                .ThenInclude(ot => ot.PaymentResults)
+                .Where(ofd => ofd.OrderTable.IsCancel != true &&
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+
+            if (startDate.HasValue)
+                query = query.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(ofd => ofd.OrderTable.OrderDate <= endDate.Value);
+
+            var categoryRevenue = await query
+                .GroupBy(ofd => new {
+                    ofd.Dish.CategoryId,
+                    ofd.Dish.Category.CategoryName
+                })
+                .Select(g => new 
+                {
+                    CategoryId = g.Key.CategoryId,
+                    CategoryName = g.Key.CategoryName,
+                    TotalQuantitySold = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Price),
+                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    OrderCount = g.Count()
+                })
+                .OrderByDescending(x => x.TotalRevenue)
+                .ToListAsync();
+
+            return Ok(categoryRevenue);
+        }
 
     }
 }
