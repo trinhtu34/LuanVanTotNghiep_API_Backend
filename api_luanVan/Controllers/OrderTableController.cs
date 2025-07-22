@@ -414,7 +414,7 @@ namespace api_LuanVan.Controllers
             });
         }
 
-        // API lấy bàn có doanh thu cao nhất
+        // lấy ra bàn có doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó
         [HttpGet("highest-revenue-table")]
         public async Task<IActionResult> GetHighestRevenueTable()
         {
@@ -427,11 +427,11 @@ namespace api_LuanVan.Controllers
                         Capacity = table.Capacity,
                         Description = table.Description,
                         RegionId = table.RegionId,
-                        RegionName = table.Region.RegionName, // Giả sử Region có thuộc tính RegionName
+                        RegionName = table.Region.RegionName,
                         TotalRevenue = table.OrderTablesDetails
                             .Where(otd => otd.OrderTable != null &&
                                          otd.OrderTable.TotalPrice != null &&
-                                         otd.OrderTable.IsCancel != true) // Loại trừ đơn hàng bị hủy
+                                         otd.OrderTable.IsCancel != true)
                             .Sum(otd => otd.OrderTable.TotalPrice ?? 0),
                         OrderCount = table.OrderTablesDetails
                             .Where(otd => otd.OrderTable != null &&
@@ -448,9 +448,9 @@ namespace api_LuanVan.Controllers
 
                 return Ok(new
                 {
-                    Success = true,
+                    //Success = true,
                     Data = tableRevenueStats,
-                    Message = "Lấy thông tin bàn có doanh thu cao nhất thành công."
+                    //Message = "Lấy thông tin bàn có doanh thu cao nhất thành công."
                 });
             }
             catch (Exception ex)
