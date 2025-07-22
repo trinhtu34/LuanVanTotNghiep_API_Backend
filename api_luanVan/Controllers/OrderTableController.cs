@@ -31,9 +31,60 @@ namespace api_LuanVan.Controllers
                     OrderDate = m.OrderDate
                 }).ToListAsync();
         }
+        // lọc rồi sắp xếp theo thời gian đặt bàn , không phải là thời gian khách đến
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTablesByFilter(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] string userId = null, 
+            [FromQuery] DateTime? startingTime = null,
+            [FromQuery] bool? isCancel = null )
+        {
+            var query = _context.OrderTables.AsQueryable();
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+            if (fromDate.HasValue)
+            {
+                var fromDateLocal = TimeZoneInfo.ConvertTimeFromUtc(fromDate.Value, vietnamTimeZone);
+                query = query.Where(m => m.OrderDate >= fromDateLocal);
+            }
+            if (toDate.HasValue)
+            {
+                var toDateLocal = TimeZoneInfo.ConvertTimeFromUtc(toDate.Value, vietnamTimeZone);
+                query = query.Where(m => m.OrderDate <= toDateLocal);
+            }
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(m => m.UserId == userId);
+            }
+            if (startingTime.HasValue)
+            {
+                query = query.Where(m => m.StartingTime >= startingTime.Value);
+            }
+            if (isCancel.HasValue)
+            {
+                query = query.Where(m => m.IsCancel == isCancel.Value);
+            }
+            var orderTables = await query
+                .OrderByDescending(m => m.OrderDate)
+                .Select(m => new DTO_OrderTable_Paymentstatus
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate,
+                    IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
+                }).ToListAsync();
+            if (orderTables == null || orderTables.Count == 0)
+                return NoContent();
+            return Ok(orderTables);
+        }
         // lấy tất cả đơn đặt bàn từ 3 tiếng trước trở về sau , không kèm thông tin thanh toán 
-        [HttpGet("afterStartingTime3HoursAgo")]
+        [HttpGet("afterStartingTime2HoursAgo")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime3HoursAgo()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
@@ -206,6 +257,8 @@ namespace api_LuanVan.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // từ đây trở xuống là api phục vụ cho việc thống kê đơn đặt bàn của 1 user
         // lấy số lượng đơn đặt bàn của 1 user
         [HttpGet("user/count/{id}")]
         public async Task<ActionResult<int>> GetOrderTableCountByUserId(string id)
