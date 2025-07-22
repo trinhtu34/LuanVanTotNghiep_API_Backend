@@ -385,5 +385,83 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(count);
         }
+
+        // api lấy ra bàn ( tableid ) có tổng doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó , 
+        [HttpGet("highest-revenue")]
+        public async Task<ActionResult<DTO_OrderTable>> GetOrderTableWithHighestRevenue()
+        {
+            var orderTable = await _context.OrderTables
+                .Select(ot => new
+                {
+                    OrderTable = ot,
+                    TotalRevenue = _context.PaymentResults
+                        .Where(pr => pr.OrderTableId == ot.OrderTableId && pr.IsSuccess == true)
+                        .Sum(pr => pr.Amount) ?? 0
+                })
+                .OrderByDescending(x => x.TotalRevenue)
+                .FirstOrDefaultAsync();
+            if (orderTable == null)
+                return NotFound();
+            return Ok(new DTO_OrderTable
+            {
+                OrderTableId = orderTable.OrderTable.OrderTableId,
+                UserId = orderTable.OrderTable.UserId,
+                StartingTime = orderTable.OrderTable.StartingTime,
+                IsCancel = orderTable.OrderTable.IsCancel,
+                TotalPrice = orderTable.OrderTable.TotalPrice,
+                TotalDeposit = orderTable.OrderTable.TotalDeposit,
+                OrderDate = orderTable.OrderTable.OrderDate
+            });
+        }
+
+        // API lấy bàn có doanh thu cao nhất
+        [HttpGet("highest-revenue-table")]
+        public async Task<IActionResult> GetHighestRevenueTable()
+        {
+            try
+            {
+                var tableRevenueStats = await _context.Tables
+                    .Select(table => new
+                    {
+                        TableId = table.TableId,
+                        Capacity = table.Capacity,
+                        Description = table.Description,
+                        RegionId = table.RegionId,
+                        RegionName = table.Region.RegionName, // Giả sử Region có thuộc tính RegionName
+                        TotalRevenue = table.OrderTablesDetails
+                            .Where(otd => otd.OrderTable != null &&
+                                         otd.OrderTable.TotalPrice != null &&
+                                         otd.OrderTable.IsCancel != true) // Loại trừ đơn hàng bị hủy
+                            .Sum(otd => otd.OrderTable.TotalPrice ?? 0),
+                        OrderCount = table.OrderTablesDetails
+                            .Where(otd => otd.OrderTable != null &&
+                                         otd.OrderTable.IsCancel != true)
+                            .Count()
+                    })
+                    .OrderByDescending(x => x.TotalRevenue)
+                    .FirstOrDefaultAsync();
+
+                if (tableRevenueStats == null)
+                {
+                    return NotFound("Không tìm thấy dữ liệu bàn nào.");
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Data = tableRevenueStats,
+                    Message = "Lấy thông tin bàn có doanh thu cao nhất thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = "Có lỗi xảy ra khi lấy thống kê.",
+                    Error = ex.Message
+                });
+            }
+        }
     }
 }
