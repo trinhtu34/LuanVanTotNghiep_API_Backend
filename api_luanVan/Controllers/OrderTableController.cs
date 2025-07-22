@@ -371,7 +371,7 @@ namespace api_LuanVan.Controllers
                 .Where(m => m.UserId == id && m.IsCancel == true)
                 .CountAsync();
             if (count == 0)
-                return NotFound();
+                return NoContent();
             return Ok(count);
         }
         // lấy số lượng đơn đặt bàn đã hủy
@@ -442,23 +442,22 @@ namespace api_LuanVan.Controllers
                             .Count()
                     })
                     .OrderByDescending(x => x.TotalRevenue)
-                    .FirstOrDefaultAsync();
+                    .ToListAsync();
+                //.FirstOrDefaultAsync();
 
                 if (tableRevenueStats == null)
                 {
-                    return NotFound("không có dữ liệu");
+                    return NoContent();
                 }
 
                 return Ok(tableRevenueStats);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    Success = false,
-                    Message = "Lỗi"
-                });
+                return NoContent();
             }
         }
+
+        // 
     }
 }
