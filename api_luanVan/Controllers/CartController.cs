@@ -436,7 +436,7 @@ namespace api_LuanVan.Controllers
                     CategoryId = g.Key.CategoryId,
                     CategoryName = g.Key.CategoryName,
                     TotalQuantitySold = g.Sum(x => x.Quantity),
-                    TotalRevenue = g.Sum(x => x.Price),
+                    TotalRevenue = g.Sum(x => x.Price * x.Quantity),
                     DishCount = g.Select(x => x.DishId).Distinct().Count(),
                     OrderCount = g.Count(),
                     Source = "OrderTable"
@@ -453,7 +453,7 @@ namespace api_LuanVan.Controllers
                     CategoryId = g.Key.CategoryId,
                     CategoryName = g.Key.CategoryName,
                     TotalQuantitySold = g.Sum(x => x.Quantity ?? 0),
-                    TotalRevenue = g.Sum(x => x.Price ?? 0),
+                    TotalRevenue = g.Sum(x => (x.Price ?? 0) * (x.Quantity ?? 0)),
                     DishCount = g.Select(x => x.DishId).Distinct().Count(),
                     OrderCount = g.Count(),
                     Source = "Cart"
