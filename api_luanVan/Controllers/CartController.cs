@@ -500,6 +500,112 @@ namespace api_LuanVan.Controllers
 
             return Ok(combinedCategoryRevenue);
         }
+        [HttpGet("revenue-by-region")]
+        public async Task<ActionResult> GetRevenueByRegion(
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            var orderQuery = _context.OrderFoodDetails
+                .Include(ofd => ofd.Dish)
+                .ThenInclude(d => d.Category)
+                .Include(ofd => ofd.OrderTable)
+                .ThenInclude(ot => ot.PaymentResults)
+                .Where(ofd => ofd.OrderTable.IsCancel != true &&
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+
+            var cartQuery = _context.CartDetails
+                .Include(cd => cd.Dish)
+                .ThenInclude(d => d.Category)
+                .Include(cd => cd.Cart)
+                .ThenInclude(c => c.PaymentResults)
+                .Where(cd => cd.Cart.IsCancel != true &&
+                            cd.Cart.IsFinish == true &&
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true));
+
+            if (startDate.HasValue)
+                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
+            if (endDate.HasValue)
+                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate <= endDate.Value);
+
+            if (startDate.HasValue)
+                cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime >= startDate.Value);
+            if (endDate.HasValue)
+                cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime <= endDate.Value);
+
+            var orderCategoryRevenue = await orderQuery
+                .GroupBy(ofd => new {
+                    ofd.Dish.RegionId,
+                    ofd.Dish.Region.RegionName
+                })
+                .Select(g => new
+                {
+                    RegionId = g.Key.RegionId,
+                    RegionName = g.Key.RegionName,
+                    TotalQuantitySold = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Price * x.Quantity),
+                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    OrderCount = g.Count(),
+                    Source = "OrderTable"
+                })
+                .ToListAsync();
+
+            var cartCategoryRevenue = await cartQuery
+                .GroupBy(cd => new {
+                    cd.Dish.RegionId,
+                    cd.Dish.Region.RegionName
+                })
+                .Select(g => new
+                {
+                    RegionId = g.Key.RegionId,
+                    RegionName = g.Key.RegionName,
+                    TotalQuantitySold = g.Sum(x => x.Quantity ?? 0),
+                    TotalRevenue = g.Sum(x => (x.Price ?? 0) * (x.Quantity ?? 0)),
+                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    OrderCount = g.Count(),
+                    Source = "Cart"
+                })
+                .ToListAsync();
+
+            var categoryDishCounts = new Dictionary<int?, int>();
+
+            foreach (var category in orderCategoryRevenue.Concat(cartCategoryRevenue)
+                .Select(x => x.RegionId).Distinct())
+            {
+                var orderDishIds = await orderQuery
+                    .Where(ofd => ofd.Dish.RegionId == category)
+                    .Select(ofd => ofd.DishId)
+                    .Distinct()
+                    .ToListAsync();
+
+                var cartDishIds = await cartQuery
+                    .Where(cd => cd.Dish.RegionId == category)
+                    .Select(cd => cd.DishId)
+                    .Distinct()
+                    .ToListAsync();
+
+                var totalDishIds = orderDishIds.Concat(cartDishIds).Distinct().Count();
+                categoryDishCounts[category] = totalDishIds;
+            }
+
+            var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
+                .GroupBy(x => new { x.RegionId, x.RegionName })
+                .Select(g => new
+                {
+                    RegionId = g.Key.RegionId,
+                    RegionName = g.Key.RegionName,
+                    TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
+                    TotalRevenue = g.Sum(x => x.TotalRevenue),
+                    DishCount = categoryDishCounts.GetValueOrDefault(g.Key.RegionId, 0),
+                    OrderCount = g.Sum(x => x.OrderCount),
+
+                    //OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
+                    //CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
+                })
+                .OrderByDescending(x => x.TotalRevenue)
+                .ToList();
+
+            return Ok(combinedCategoryRevenue);
+        }
 
     }
 }
