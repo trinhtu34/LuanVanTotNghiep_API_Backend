@@ -414,7 +414,7 @@ namespace api_LuanVan.Controllers
             });
         }
 
-        // lấy ra bàn có doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó , cảm thấy là chưa tối ưu lắm về logic , tối về xem lại chức năng này 
+        // lấy ra bàn có doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó
         [HttpGet("highest-revenue-table")]
         public async Task<IActionResult> GetHighestRevenueTable()
         {
@@ -442,7 +442,9 @@ namespace api_LuanVan.Controllers
                             .Count()
                     })
                     .OrderByDescending(x => x.TotalRevenue)
+                    //.Take(10)
                     .ToListAsync();
+                //.ToListAsync();
                 //.FirstOrDefaultAsync();
 
                 if (tableRevenueStats == null)
@@ -457,7 +459,5 @@ namespace api_LuanVan.Controllers
                 return NoContent();
             }
         }
-
-        // 
     }
 }
