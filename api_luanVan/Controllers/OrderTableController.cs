@@ -83,12 +83,12 @@ namespace api_LuanVan.Controllers
                 return NoContent();
             return Ok(orderTables);
         }
-        // lấy tất cả đơn đặt bàn từ 3 tiếng trước trở về sau , không kèm thông tin thanh toán 
+        // lấy tất cả đơn đặt bàn từ 2 tiếng trước trở về sau , không kèm thông tin thanh toán 
         [HttpGet("afterStartingTime2HoursAgo")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime3HoursAgo()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-3);
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddMinutes(-2);
 
             var orderTables = await _context.OrderTables
                 .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
