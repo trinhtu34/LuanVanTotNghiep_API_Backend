@@ -414,12 +414,13 @@ namespace api_LuanVan.Controllers
             });
         }
 
-        // lấy ra bàn có doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó
+        // lấy ra bàn có doanh thu cao nhất , doanh thu cao nhất là tổng doanh thu của tất cả các đơn đặt bàn có bàn đó , cảm thấy là chưa tối ưu lắm về logic , tối về xem lại chức năng này 
         [HttpGet("highest-revenue-table")]
         public async Task<IActionResult> GetHighestRevenueTable()
         {
             try
             {
+
                 var tableRevenueStats = await _context.Tables
                     .Select(table => new
                     {
@@ -431,11 +432,13 @@ namespace api_LuanVan.Controllers
                         TotalRevenue = table.OrderTablesDetails
                             .Where(otd => otd.OrderTable != null &&
                                          otd.OrderTable.TotalPrice != null &&
-                                         otd.OrderTable.IsCancel != true)
+                                         otd.OrderTable.IsCancel != true &&
+                                         otd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true))
                             .Sum(otd => otd.OrderTable.TotalPrice ?? 0),
                         OrderCount = table.OrderTablesDetails
                             .Where(otd => otd.OrderTable != null &&
-                                         otd.OrderTable.IsCancel != true)
+                                         otd.OrderTable.IsCancel != true &&
+                                         otd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true))
                             .Count()
                     })
                     .OrderByDescending(x => x.TotalRevenue)
@@ -443,7 +446,7 @@ namespace api_LuanVan.Controllers
 
                 if (tableRevenueStats == null)
                 {
-                    return NotFound("Không tìm thấy dữ liệu bàn nào.");
+                    return NotFound("không có dữ liệu");
                 }
 
                 return Ok(tableRevenueStats);
@@ -453,8 +456,7 @@ namespace api_LuanVan.Controllers
                 return StatusCode(500, new
                 {
                     Success = false,
-                    Message = "Có lỗi xảy ra khi lấy thống kê.",
-                    Error = ex.Message
+                    Message = "Lỗi"
                 });
             }
         }
