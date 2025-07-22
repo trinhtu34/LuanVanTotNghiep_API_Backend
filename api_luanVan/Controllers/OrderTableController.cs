@@ -446,12 +446,7 @@ namespace api_LuanVan.Controllers
                     return NotFound("Không tìm thấy dữ liệu bàn nào.");
                 }
 
-                return Ok(new
-                {
-                    //Success = true,
-                    Data = tableRevenueStats,
-                    //Message = "Lấy thông tin bàn có doanh thu cao nhất thành công."
-                });
+                return Ok(tableRevenueStats);
             }
             catch (Exception ex)
             {
