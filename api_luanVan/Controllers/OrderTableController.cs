@@ -181,7 +181,7 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(orderTables);
         }
-        // lấy thông tin đơn đặt bàn theo id
+
         // this function is without payment status
         // hiện tại không còn dùng nữa vì đã có api trả về đơn đặt bàn kèm trạng thái thanh toán                                 XXXXX LƯU Ý !
         [HttpGet("{userid}")]
@@ -205,6 +205,7 @@ namespace api_LuanVan.Controllers
         }
 
         // lấy thông tin đơn đặt bàn theo id có cả trạng thái thanh toán , cái này dùng để cho việc sửa chức năng đặt bàn sau khi báo cáo xong luận văn 
+        // tạm thời đình chỉ api này , có api dưới cải tiến ok hơn 
         [HttpGet("includepaymentstatus/{userid}")]
         public async Task<ActionResult<DTO_OrderTable_Paymentstatus>> GetOrderTableByUserIDHaveStatus(string userid)
         {
@@ -220,6 +221,30 @@ namespace api_LuanVan.Controllers
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate,
                     IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
+                }).ToListAsync();
+            if (orderTable == null || orderTable.Count == 0)
+                return Ok();
+            return Ok(orderTable);
+        }
+
+
+        // hiện tại api này dùng cho trang DanhSachDatBan của khách hàng , đang thử nghiệm
+        [HttpGet("includepaymentstatusnewvers/{userid}")]
+        public async Task<ActionResult<DTO_OrderTable_Paymentstatus_Food_payment_info>> GetOrderTableByUserIDHaveStatusNewVers(string userid)
+        {
+            var orderTable = await _context.OrderTables
+                .Where(m => m.UserId == userid)
+                .Select(m => new DTO_OrderTable_Paymentstatus_Food_payment_info
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate,
+                    IsPaidDeposit = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalDeposit),
+                    IsPaidTotalPrice = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalPrice),
                 }).ToListAsync();
             if (orderTable == null || orderTable.Count == 0)
                 return Ok();
