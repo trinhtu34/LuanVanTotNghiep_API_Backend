@@ -160,13 +160,15 @@ namespace api_LuanVan.Controllers
 
             return Ok(orderTables);
         }
-
-        // api trả về đơn đặt bàn kèm trạng thái thanh toán 
-        [HttpGet("paymentstatus")]
-        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTablesWithPaymentStatus()
+        [HttpGet("afterCurrentStartingTimeNewerVer")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus_Food_payment_info>>> GetOrderTableAfterCurrentStartingTimeNewerVers()
         {
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
+
             var orderTables = await _context.OrderTables
-                .Select(m => new DTO_OrderTable_Paymentstatus
+                .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
+                .Select(m => new DTO_OrderTable_Paymentstatus_Food_payment_info
                 {
                     OrderTableId = m.OrderTableId,
                     UserId = m.UserId,
@@ -175,7 +177,34 @@ namespace api_LuanVan.Controllers
                     TotalPrice = m.TotalPrice,
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate,
-                    IsPaid = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true)
+                    IsPaidDeposit = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalDeposit),
+                    IsPaidTotalPrice = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalPrice),
+
+                }).ToListAsync();
+
+            if (orderTables == null || orderTables.Count == 0)
+                return NoContent();
+
+            return Ok(orderTables);
+        }
+
+        // api trả về đơn đặt bàn kèm trạng thái thanh toán 
+        // sửa ngày 07/23/2025 2 thuộc tính thông tin thanh toán 
+        [HttpGet("paymentstatus")]
+        public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus_Food_payment_info>>> GetOrderTablesWithPaymentStatus()
+        {
+            var orderTables = await _context.OrderTables
+                .Select(m => new DTO_OrderTable_Paymentstatus_Food_payment_info
+                {
+                    OrderTableId = m.OrderTableId,
+                    UserId = m.UserId,
+                    StartingTime = m.StartingTime,
+                    IsCancel = m.IsCancel,
+                    TotalPrice = m.TotalPrice,
+                    TotalDeposit = m.TotalDeposit,
+                    OrderDate = m.OrderDate,
+                    IsPaidDeposit = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalDeposit),
+                    IsPaidTotalPrice = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalPrice)
                 }).ToListAsync();
             if (orderTables == null || orderTables.Count == 0)
                 return NotFound();
@@ -244,7 +273,7 @@ namespace api_LuanVan.Controllers
                     TotalDeposit = m.TotalDeposit,
                     OrderDate = m.OrderDate,
                     IsPaidDeposit = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalDeposit),
-                    IsPaidTotalPrice = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalPrice),
+                    IsPaidTotalPrice = _context.PaymentResults.Any(p => p.OrderTableId == m.OrderTableId && p.IsSuccess == true && p.Amount == m.TotalPrice)
                 }).ToListAsync();
             if (orderTable == null || orderTable.Count == 0)
                 return Ok();
