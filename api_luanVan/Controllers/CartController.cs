@@ -289,7 +289,7 @@ namespace api_LuanVan.Controllers
             return Ok(totalPrice);
         }
 
-        // api lấy doanh thu của món ăn theo khoảng thời gian và loại món ăn 
+        // api lấy doanh thu của món ăn theo khoảng thời gian và loại món ăn ------- chưa deploy fucntion này 
         [HttpGet("dish-revenue")]
         public async Task<ActionResult> GetDishRevenue(
             [FromQuery] DateTime? startDate = null,
@@ -305,7 +305,7 @@ namespace api_LuanVan.Controllers
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
                 .Where(ofd => ofd.OrderTable.IsCancel != true &&
-                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
             var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
@@ -316,7 +316,7 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
                             cd.Cart.IsFinish == true &&
-                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true));
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ( cd.Quantity * cd.Price)));
 
             if (startDate.HasValue)
                 orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
@@ -422,7 +422,7 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(otd => otd.Table)
                 .ThenInclude(t => t.Region)
                 .Where(ofd => ofd.OrderTable.IsCancel != true &&
-                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
             var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
@@ -443,7 +443,7 @@ namespace api_LuanVan.Controllers
             if (endDate.HasValue)
                 cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime <= endDate.Value);
 
-            // Thống kê theo Region và Category cho OrderTable
+            // thống kê theo region và category từ ordertable
             var orderRegionCategoryRevenue = await orderQuery
                 .SelectMany(ofd => ofd.OrderTable.OrderTablesDetails.Select(otd => new
                 {
@@ -496,13 +496,13 @@ namespace api_LuanVan.Controllers
 
             var result = new
             {
-                // Thống kê theo Region và Category từ mỗi ordertable thôi
+                // Thống kê theo Region và Category từ mỗi ordertable thôi -- hiện tại đang bị sai 
                 RegionCategoryStats = orderRegionCategoryRevenue
                     .OrderBy(x => x.RegionName)
                     .ThenByDescending(x => x.TotalRevenue)
                     .ToList(),
 
-                // Tổng quan theo Categorycái này gộp cả ordertable và cart bằng concat ----- Hiện tại đang có vấn đề về Count số lượng bán 
+                // Tổng quan theo Categorycái này gộp cả ordertable và cart bằng concat ----- 
                 OverallCategoryStats = orderRegionCategoryRevenue
                     .GroupBy(x => new { x.CategoryId, x.CategoryName })
                     .Select(g => new
@@ -511,7 +511,7 @@ namespace api_LuanVan.Controllers
                         CategoryName = g.Key.CategoryName,
                         TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                         TotalRevenue = g.Sum(x => x.TotalRevenue),
-                        DishCount = g.Sum(x => x.DishCount), // xem lại chỗ này , count bị sai 
+                        DishCount = g.Sum(x => x.DishCount),
                         OrderTableCount = g.Sum(x => x.OrderCount)
                     })
                     .Concat(cartCategoryRevenue.Select(c => new
@@ -536,7 +536,7 @@ namespace api_LuanVan.Controllers
                     .OrderByDescending(x => x.TotalRevenue)
                     .ToList(),
 
-                CartStats = cartCategoryRevenue.OrderByDescending(x => x.TotalRevenue).ToList()
+                //CartStats = cartCategoryRevenue.OrderByDescending(x => x.TotalRevenue).ToList()
             };
 
             return Ok(result);
@@ -555,7 +555,7 @@ namespace api_LuanVan.Controllers
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
                 .Where(ofd => ofd.OrderTable.IsCancel != true &&
-                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
             var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
@@ -655,13 +655,13 @@ namespace api_LuanVan.Controllers
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            var orderQuery = _context.OrderFoodDetails
+            var orderQuery = _context.OrderFoodDetails 
                 .Include(ofd => ofd.Dish)
                 .ThenInclude(d => d.Category)
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
                 .Where(ofd => ofd.OrderTable.IsCancel != true &&
-                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true));
+                             ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
             var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
