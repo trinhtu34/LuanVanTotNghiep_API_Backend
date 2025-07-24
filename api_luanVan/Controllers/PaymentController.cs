@@ -39,6 +39,7 @@ namespace api_LuanVan.Controllers
                 var results = await query
                     .Select(pr => new DTO_Payment
                     {
+                        PaymentResultId = pr.PaymentResultId,
                         OrderTableId = pr.OrderTableId,
                         CartId = pr.CartId,
                         PaymentId = pr.PaymentId,
