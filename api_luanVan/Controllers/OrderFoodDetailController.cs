@@ -75,7 +75,7 @@ namespace api_LuanVan.Controllers
                 DishId = dto.DishId,
                 Quantity = dto.Quantity,
                 Price = dto.Price,
-                Note = dto.Note
+                Note = ""
             };
             _context.OrderFoodDetails.Add(orderFoodDetail);
             await _context.SaveChangesAsync();
@@ -92,7 +92,6 @@ namespace api_LuanVan.Controllers
             if (orderFoodDetail == null)
                 return NotFound();
             orderFoodDetail.Quantity = dto.Quantity;
-            orderFoodDetail.Price = dto.Price;
             _context.Entry(orderFoodDetail).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();

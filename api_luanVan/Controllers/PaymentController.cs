@@ -16,6 +16,7 @@ namespace api_LuanVan.Controllers
         {
             _context = context;
         }
+        // api dùng để lấy ra thông tin thanh toán và thống kê doanh thu theo tuần , tháng , quý , năm 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetAllPaymentResultsWithFilter(
             [FromQuery] DateTime? fromDate = null,
