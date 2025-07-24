@@ -92,7 +92,7 @@ namespace api_LuanVan.Controllers
                 return NotFound("This orderfood detail is not found in database");
             }
 
-            orderFoodDetail.Quantity = dto.Quantity;
+            orderFoodDetail.Quantity += dto.Quantity;
             _context.Entry(orderFoodDetail).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
