@@ -86,7 +86,7 @@ namespace api_LuanVan.Controllers
         [HttpPut("quantity/{id}")]
         public async Task<IActionResult> UpdateOrderFoodDetail(int id, DTO_OrderFoodDetail_Update_Quantity dto)
         {
-            var orderFoodDetail = await _context.OrderFoodDetails.FirstOrDefaultAsync(ofd => ofd.OrderFoodDetailsId == id);
+            var orderFoodDetail = await _context.OrderFoodDetails.FindAsync(id);
             if (orderFoodDetail == null)
             {
                 return NotFound("This orderfood detail is not found in database");
