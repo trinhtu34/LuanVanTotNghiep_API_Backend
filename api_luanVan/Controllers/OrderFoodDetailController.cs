@@ -83,7 +83,7 @@ namespace api_LuanVan.Controllers
             return CreatedAtAction(nameof(GetOrderFoodDetailById), new { id = orderFoodDetail.OrderFoodDetailsId }, dto);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("quantity/{id}")]
         public async Task<IActionResult> UpdateOrderFoodDetail(int id, DTO_OrderFoodDetail dto)
         {
             if (id != dto.OrderFoodDetailsId)
@@ -91,11 +91,8 @@ namespace api_LuanVan.Controllers
             var orderFoodDetail = await _context.OrderFoodDetails.FindAsync(id);
             if (orderFoodDetail == null)
                 return NotFound();
-            orderFoodDetail.OrderTableId = dto.OrderTableId;
-            orderFoodDetail.DishId = dto.DishId;
             orderFoodDetail.Quantity = dto.Quantity;
             orderFoodDetail.Price = dto.Price;
-            orderFoodDetail.Note = dto.Note;
             _context.Entry(orderFoodDetail).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();

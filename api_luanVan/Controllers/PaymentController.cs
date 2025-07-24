@@ -16,49 +16,72 @@ namespace api_LuanVan.Controllers
         {
             _context = context;
         }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetAllPaymentResults()
+        public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetAllPaymentResultsWithFilter(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null
+        )
         {
-            return await _context.PaymentResults
-                .Select(pr => new DTO_Payment
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var query = _context.PaymentResults.AsQueryable();
+                if (fromDate.HasValue)
                 {
-                    OrderTableId = pr.OrderTableId,
-                    CartId = pr.CartId,
-                    PaymentId = pr.PaymentId,
-                    Amount = pr.Amount,
-                    IsSuccess = pr.IsSuccess,
-                    Description = pr.Description,
-                    Timestamp = pr.Timestamp,
-                    VnpayTransactionId = pr.VnpayTransactionId,
-                    PaymentMethod = pr.PaymentMethod,
-                    BankCode = pr.BankCode,
-                    BankTransactionId = pr.BankTransactionId,
-                    ResponseDescription = pr.ResponseDescription,
-                    TransactionStatusDescription = pr.TransactionStatusDescription
-                }).ToListAsync();
-        }
-        [HttpGet("paymenthistory/ordertable")]
-        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetPaymentHistoryOrderTable()
-        {
-            var paymentResults = await _context.PaymentResults
-                .Where(pr => pr.OrderTableId != null)
-                .Select(pr => new DTO_Payment_ShowHistoryPayment_OrderTable
+                    var fromUtc = TimeZoneInfo.ConvertTimeToUtc(fromDate.Value, vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp >= fromUtc);
+                }
+                if (toDate.HasValue)
                 {
-                    PaymentResultId = pr.PaymentResultId,
-                    OrderTableId = pr.OrderTableId,
-                    Amount = pr.Amount,
-                    IsSuccess = pr.IsSuccess,
-                    Timestamp = pr.Timestamp,
-                    PaymentMethod = pr.PaymentMethod,
-                    BankCode = pr.BankCode,
-                    ResponseDescription = pr.ResponseDescription,
-                    TransactionStatusDescription = pr.TransactionStatusDescription
-                }).ToListAsync();
-            if (paymentResults == null || !paymentResults.Any())
-                return NotFound();
-            return paymentResults;
+                    var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.Value.AddDays(1).AddSeconds(-1), vietnamTimeZone);
+                    query = query.Where(p => p.Timestamp <= toUtc);
+                }
+                var results = await query
+                    .Select(pr => new DTO_Payment
+                    {
+                        OrderTableId = pr.OrderTableId,
+                        CartId = pr.CartId,
+                        PaymentId = pr.PaymentId,
+                        Amount = pr.Amount,
+                        IsSuccess = pr.IsSuccess,
+                        Description = pr.Description,
+                        Timestamp = pr.Timestamp,
+                        VnpayTransactionId = pr.VnpayTransactionId,
+                        PaymentMethod = pr.PaymentMethod,
+                        BankCode = pr.BankCode,
+                        BankTransactionId = pr.BankTransactionId,
+                        ResponseDescription = pr.ResponseDescription,
+                        TransactionStatusDescription = pr.TransactionStatusDescription
+                    }).ToListAsync();
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi: {ex.Message}");
+            }
         }
+        //[HttpGet("paymenthistory/ordertable")]
+        //public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetPaymentHistoryOrderTable()
+        //{
+        //    var paymentResults = await _context.PaymentResults
+        //        .Where(pr => pr.OrderTableId != null)
+        //        .Select(pr => new DTO_Payment_ShowHistoryPayment_OrderTable
+        //        {
+        //            PaymentResultId = pr.PaymentResultId,
+        //            OrderTableId = pr.OrderTableId,
+        //            Amount = pr.Amount,
+        //            IsSuccess = pr.IsSuccess,
+        //            Timestamp = pr.Timestamp,
+        //            PaymentMethod = pr.PaymentMethod,
+        //            BankCode = pr.BankCode,
+        //            ResponseDescription = pr.ResponseDescription,
+        //            TransactionStatusDescription = pr.TransactionStatusDescription
+        //        }).ToListAsync();
+        //    if (paymentResults == null || !paymentResults.Any())
+        //        return NotFound();
+        //    return paymentResults;
+        //}
+
         [HttpGet("paymenthistory/ordertable/filter")]
         public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_OrderTable>>> GetOrdertablePaymentHistoryWithFilters(
             [FromQuery] DateTime? fromDate = null,
@@ -131,27 +154,28 @@ namespace api_LuanVan.Controllers
                 return BadRequest($"Lỗi: {ex.Message}");
             }
         }
-        [HttpGet("paymenthistory/cart")]
-        public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryCart()
-        {
-            var paymentResults = await _context.PaymentResults
-                .Where(pr => pr.CartId != null)
-                .Select(pr => new DTO_Payment_ShowHistoryPayment_Cart
-                {
-                    PaymentResultId = pr.PaymentResultId,
-                    CartId = pr.CartId,
-                    Amount = pr.Amount,
-                    IsSuccess = pr.IsSuccess,
-                    Timestamp = pr.Timestamp,
-                    PaymentMethod = pr.PaymentMethod,
-                    BankCode = pr.BankCode,
-                    ResponseDescription = pr.ResponseDescription,
-                    TransactionStatusDescription = pr.TransactionStatusDescription
-                }).ToListAsync();
-            if (paymentResults == null || !paymentResults.Any())
-                return NotFound();
-            return paymentResults;
-        }
+        //[HttpGet("paymenthistory/cart")]
+        //public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryCart()
+        //{
+        //    var paymentResults = await _context.PaymentResults
+        //        .Where(pr => pr.CartId != null)
+        //        .Select(pr => new DTO_Payment_ShowHistoryPayment_Cart
+        //        {
+        //            PaymentResultId = pr.PaymentResultId,
+        //            CartId = pr.CartId,
+        //            Amount = pr.Amount,
+        //            IsSuccess = pr.IsSuccess,
+        //            Timestamp = pr.Timestamp,
+        //            PaymentMethod = pr.PaymentMethod,
+        //            BankCode = pr.BankCode,
+        //            ResponseDescription = pr.ResponseDescription,
+        //            TransactionStatusDescription = pr.TransactionStatusDescription
+        //        }).ToListAsync();
+        //    if (paymentResults == null || !paymentResults.Any())
+        //        return NotFound();
+        //    return paymentResults;
+        //}
+
         [HttpGet("paymenthistory/cart/filter")]
         public async Task<ActionResult<IEnumerable<DTO_Payment_ShowHistoryPayment_Cart>>> GetPaymentHistoryWithFilters(
             [FromQuery] DateTime? fromDate = null,

@@ -135,6 +135,8 @@ namespace api_LuanVan.Controllers
         //}
         // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau có kèm thông tin thanh toán 
         // api này sử dụng trong trang quản lý đơn đặt bàn của nhân viên
+
+
         [HttpGet("afterCurrentStartingTime")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTableAfterCurrentStartingTime()
         {
@@ -321,6 +323,24 @@ namespace api_LuanVan.Controllers
             orderTable.StartingTime = dto.StartingTime;
             orderTable.TotalPrice = dto.TotalPrice;
             orderTable.TotalDeposit = dto.TotalDeposit;
+            _context.Entry(orderTable).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // api tính tổng giá trị của đơn đặt bàn , tổng giá trị là tổng giá trị của tất cả các món ăn trong đơn đặt bàn đó , sau đó thay thế vào giá trị cũ
+        // api này chỉ call 1 lần trong việc thêm món ăn vào đơn đặt bàn cho khách , chưa sử dụng ở nơi nào khác 
+        // thêm ngày 07/24/2025
+        [HttpPut("totalprice/calculate/{id}")]
+        public async Task<ActionResult<DTO_OrderTable>> UpdateOrderTableTotalPriceAndCalculate(long id)
+        {
+            var orderTable = await _context.OrderTables.FindAsync(id);
+            if (orderTable == null)
+                return NotFound();
+            var totalPrice = await _context.OrderFoodDetails
+                .Where(od => od.OrderTableId == id)
+                .SumAsync(od => od.Price * od.Quantity);
+            orderTable.TotalPrice = totalPrice;
             _context.Entry(orderTable).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
