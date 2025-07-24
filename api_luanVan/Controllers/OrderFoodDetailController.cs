@@ -84,7 +84,7 @@ namespace api_LuanVan.Controllers
         }
 
         [HttpPut("quantity/{id}")]
-        public async Task<IActionResult> UpdateOrderFoodDetail(int id, DTO_OrderFoodDetail dto)
+        public async Task<IActionResult> UpdateOrderFoodDetail(int id, DTO_OrderFoodDetail_Update_Quantity dto)
         {
             var orderFoodDetail = await _context.OrderFoodDetails.FirstOrDefaultAsync(ofd => ofd.OrderFoodDetailsId == id);
             if (orderFoodDetail == null)

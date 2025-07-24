@@ -6,7 +6,7 @@
 
         public long OrderTableId { get; set; }
 
-        public string DishId { get; set; } = null!;
+        public string DishId { get; set; }
 
         public int Quantity { get; set; }
 
