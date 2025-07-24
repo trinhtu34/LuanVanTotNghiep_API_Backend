@@ -86,11 +86,12 @@ namespace api_LuanVan.Controllers
         [HttpPut("quantity/{id}")]
         public async Task<IActionResult> UpdateOrderFoodDetail(int id, DTO_OrderFoodDetail dto)
         {
-            if (id != dto.OrderFoodDetailsId)
-                return BadRequest("ID mismatch");
-            var orderFoodDetail = await _context.OrderFoodDetails.FindAsync(id);
+            var orderFoodDetail = await _context.OrderFoodDetails.FirstOrDefaultAsync(ofd => ofd.OrderFoodDetailsId == id);
             if (orderFoodDetail == null)
-                return NotFound();
+            {
+                return NotFound("This orderfood detail is not found in database");
+            }
+
             orderFoodDetail.Quantity = dto.Quantity;
             _context.Entry(orderFoodDetail).State = EntityState.Modified;
             await _context.SaveChangesAsync();
