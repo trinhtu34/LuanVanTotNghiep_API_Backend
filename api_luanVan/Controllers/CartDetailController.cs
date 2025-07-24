@@ -16,20 +16,24 @@ namespace api_LuanVan.Controllers
             _context = context;
         }
         [HttpGet("cart/{cartId}")]
-        public async Task<ActionResult<IEnumerable<DTO_CartDetail>>> GetCartDetailsByCartId(long cartId)
+        public async Task<ActionResult<IEnumerable<DTO_CartDetail_WithName>>> GetCartDetailsByCartId(long cartId)
         {
             var cartDetails = await _context.CartDetails
                 .Where(cd => cd.CartId == cartId)
-                .Select(cd => new DTO_CartDetail
+                .Select(cd => new DTO_CartDetail_WithName
                 {
                     CartDetailsId = cd.CartDetailsId,
                     CartId = cd.CartId,
                     DishId = cd.DishId,
+                    DishName = _context.Menus
+                        .Where(d => d.DishId == cd.DishId)
+                        .Select(d => d.DishName)
+                        .FirstOrDefault() ?? "Unknown Dish",
                     Quantity = cd.Quantity,
                     Price = cd.Price
                 }).ToListAsync();
             if (cartDetails == null)
-                return NotFound();
+                return NoContent();
             if (cartDetails.Count == 0)
                 return Ok();
             return Ok(cartDetails);
