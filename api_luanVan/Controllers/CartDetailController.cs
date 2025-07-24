@@ -32,10 +32,8 @@ namespace api_LuanVan.Controllers
                     Quantity = cd.Quantity,
                     Price = cd.Price
                 }).ToListAsync();
-            if (cartDetails == null)
+            if (cartDetails == null || cartDetails.Count == 0)
                 return NoContent();
-            if (cartDetails.Count == 0)
-                return Ok();
             return Ok(cartDetails);
         }
         [HttpPost]
