@@ -84,11 +84,11 @@ namespace api_LuanVan.Controllers
             return Ok(orderTables);
         }
         // lấy tất cả đơn đặt bàn từ 2 tiếng trước trở về sau , không kèm thông tin thanh toán 
-        [HttpGet("afterStartingTime2HoursAgo")]
+        [HttpGet("afterStartingTime3HoursAgo")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime3HoursAgo()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddMinutes(-2);
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddMinutes(-3);
 
             var orderTables = await _context.OrderTables
                 .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
@@ -109,36 +109,37 @@ namespace api_LuanVan.Controllers
             return Ok(orderTables);
         }
         // lấy tất cả đơn đặt bàn từ 2 phút trước trở về sau , không kèm thông tin thanh toán 
-        [HttpGet("afterStartingTime2MinutesAgo")]
-        public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime2MinutesAgo()
-        {
-            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddMinutes(-2);
+        //[HttpGet("afterStartingTime2MinutesAgo")]
+        //public async Task<ActionResult<IEnumerable<DTO_OrderTable>>> GetOrderTableAfterStartingTime2MinutesAgo()
+        //{
+        //    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        //    var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddMinutes(-2);
 
-            var orderTables = await _context.OrderTables
-                .Where(m => m.OrderDate > currentTime && m.IsCancel == false)
-                .Select(m => new DTO_OrderTable
-                {
-                    OrderTableId = m.OrderTableId,
-                    UserId = m.UserId,
-                    StartingTime = m.StartingTime,
-                    IsCancel = m.IsCancel,
-                    TotalPrice = m.TotalPrice,
-                    TotalDeposit = m.TotalDeposit,
-                    OrderDate = m.OrderDate
-                }).ToListAsync();
+        //    var orderTables = await _context.OrderTables
+        //        .Where(m => m.OrderDate > currentTime && m.IsCancel == false)
+        //        .Select(m => new DTO_OrderTable
+        //        {
+        //            OrderTableId = m.OrderTableId,
+        //            UserId = m.UserId,
+        //            StartingTime = m.StartingTime,
+        //            IsCancel = m.IsCancel,
+        //            TotalPrice = m.TotalPrice,
+        //            TotalDeposit = m.TotalDeposit,
+        //            OrderDate = m.OrderDate
+        //        }).ToListAsync();
 
-            if (orderTables == null || orderTables.Count == 0)
-                return NoContent();
+        //    if (orderTables == null || orderTables.Count == 0)
+        //        return NoContent();
 
-            return Ok(orderTables);
-        }
+        //    return Ok(orderTables);
+        //}
         // lấy tất cả đơn đặt bàn từ 1 tiếng trước trở về sau có kèm thông tin thanh toán 
+        // api này sử dụng trong trang quản lý đơn đặt bàn của nhân viên
         [HttpGet("afterCurrentStartingTime")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus>>> GetOrderTableAfterCurrentStartingTime()
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-1);
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).AddHours(-2);
 
             var orderTables = await _context.OrderTables
                 .Where(m => m.StartingTime > currentTime && m.IsCancel == false)
@@ -189,6 +190,7 @@ namespace api_LuanVan.Controllers
         }
 
         // api trả về đơn đặt bàn kèm trạng thái thanh toán 
+        // hiện đang dùng cho trang quản lý đơn đặt bàn của nhân viên 
         // sửa ngày 07/23/2025 2 thuộc tính thông tin thanh toán 
         [HttpGet("paymentstatus")]
         public async Task<ActionResult<IEnumerable<DTO_OrderTable_Paymentstatus_Food_payment_info>>> GetOrderTablesWithPaymentStatus()
@@ -213,6 +215,7 @@ namespace api_LuanVan.Controllers
 
         // this function is without payment status
         // hiện tại không còn dùng nữa vì đã có api trả về đơn đặt bàn kèm trạng thái thanh toán                                 XXXXX LƯU Ý !
+        // outdated
         [HttpGet("{userid}")]
         public async Task<ActionResult<DTO_OrderTable>> GetOrderTableByUserID(string userid)
         {
@@ -235,6 +238,7 @@ namespace api_LuanVan.Controllers
 
         // lấy thông tin đơn đặt bàn theo id có cả trạng thái thanh toán , cái này dùng để cho việc sửa chức năng đặt bàn sau khi báo cáo xong luận văn 
         // tạm thời đình chỉ api này , có api dưới cải tiến ok hơn 
+        // outdated
         [HttpGet("includepaymentstatus/{userid}")]
         public async Task<ActionResult<DTO_OrderTable_Paymentstatus>> GetOrderTableByUserIDHaveStatus(string userid)
         {
