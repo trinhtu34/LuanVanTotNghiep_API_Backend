@@ -551,8 +551,8 @@ namespace api_LuanVan.Controllers
         // lấy thông tin doanh thu theo loại món ăn theo thời gian , ý là in ra loại món ăn và doanh thu của nó 
         [HttpGet("revenue-by-category")]
         public async Task<ActionResult> GetRevenueByCategory(
-    [FromQuery] DateTime? startDate = null,
-    [FromQuery] DateTime? endDate = null)
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
         {
             var orderQuery = _context.OrderFoodDetails
                 .Include(ofd => ofd.Dish)
@@ -591,7 +591,7 @@ namespace api_LuanVan.Controllers
                     CategoryName = g.Key.CategoryName,
                     TotalQuantitySold = g.Sum(x => x.Quantity),
                     TotalRevenue = g.Sum(x => x.Price * x.Quantity),
-                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    DishIds = g.Select(x => x.DishId).Distinct().ToList(), // Lưu danh sách DishId
                     OrderCount = g.Count(),
                     Source = "OrderTable"
                 })
@@ -608,19 +608,23 @@ namespace api_LuanVan.Controllers
                     CategoryName = g.Key.CategoryName,
                     TotalQuantitySold = g.Sum(x => x.Quantity ?? 0),
                     TotalRevenue = g.Sum(x => (x.Price ?? 0) * (x.Quantity ?? 0)),
-                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    DishIds = g.Select(x => x.DishId).Distinct().ToList(), // Lưu danh sách DishId
                     OrderCount = g.Count(),
                     Source = "Cart"
                 })
                 .ToListAsync();
 
-            var allDishIds = await orderQuery.Select(ofd => new { ofd.DishId, ofd.Dish.CategoryId })
-                .Union(cartQuery.Select(cd => new { cd.DishId, cd.Dish.CategoryId }))
-                .ToListAsync();
-
-            var categoryDishCounts = allDishIds
-                .GroupBy(x => x.CategoryId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.DishId).Distinct().Count());
+            // lỗi ở đây , lấy thiếu vì món nào được khách đặt mới thống kê , không thì nó sẽ không lấy data
+            var dishCountByCategory = await _context.Menus
+                .Include(d => d.Category)
+                .GroupBy(d => new { d.CategoryId, d.Category.CategoryName })
+                .Select(g => new
+                {
+                    CategoryId = g.Key.CategoryId,
+                    CategoryName = g.Key.CategoryName,
+                    TotalDishCount = g.Count()
+                })
+                .ToDictionaryAsync(x => x.CategoryId, x => x.TotalDishCount);
 
             var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
                 .GroupBy(x => new { x.CategoryId, x.CategoryName })
@@ -630,7 +634,8 @@ namespace api_LuanVan.Controllers
                     CategoryName = g.Key.CategoryName,
                     TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                     TotalRevenue = g.Sum(x => x.TotalRevenue),
-                    DishCount = categoryDishCounts.GetValueOrDefault(g.Key.CategoryId, 0),
+                    DishCount = dishCountByCategory.GetValueOrDefault(g.Key.CategoryId, 0),
+                    OrderedDishCount = g.SelectMany(x => x.DishIds).Distinct().Count(),
                     OrderCount = g.Sum(x => x.OrderCount)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
@@ -681,7 +686,7 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     TotalQuantitySold = g.Sum(x => x.Quantity),
                     TotalRevenue = g.Sum(x => x.Price * x.Quantity),
-                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    DishIds = g.Select(x => x.DishId).Distinct().ToList(),
                     OrderCount = g.Count(),
                     Source = "OrderTable"
                 })
@@ -698,18 +703,20 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     TotalQuantitySold = g.Sum(x => x.Quantity ?? 0),
                     TotalRevenue = g.Sum(x => (x.Price ?? 0) * (x.Quantity ?? 0)),
-                    DishCount = g.Select(x => x.DishId).Distinct().Count(),
+                    DishIds = g.Select(x => x.DishId).Distinct().ToList(),
                     OrderCount = g.Count(),
                     Source = "Cart"
                 })
                 .ToListAsync();
-            var allDishIds = await orderQuery.Select(ofd => new { ofd.DishId, ofd.Dish.RegionId })
-                .Union(cartQuery.Select(cd => new { cd.DishId, cd.Dish.RegionId }))
-                .ToListAsync();
-
-            var regionDishCounts = allDishIds
-                .GroupBy(x => x.RegionId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.DishId).Distinct().Count());
+            var dishCountByRegion = await _context.Menus
+                .GroupBy(d => new { d.RegionId, d.Region.RegionName })
+                .Select(g => new
+                {
+                    RegionId = g.Key.RegionId,
+                    RegionName = g.Key.RegionName,
+                    TotalDishCount = g.Count()
+                })
+                .ToDictionaryAsync(x => x.RegionId, x => x.TotalDishCount);
 
             var combinedRegionRevenue = orderRegionRevenue.Concat(cartRegionRevenue)
                 .GroupBy(x => new { x.RegionId, x.RegionName })
@@ -719,7 +726,8 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                     TotalRevenue = g.Sum(x => x.TotalRevenue),
-                    DishCount = regionDishCounts.GetValueOrDefault(g.Key.RegionId, 0), // Lấy từ dictionary đã tính
+                    DishCount = dishCountByRegion.GetValueOrDefault(g.Key.RegionId, 0),
+                    OrderedDishCount = g.SelectMany(x => x.DishIds).Distinct().Count(),
                     OrderCount = g.Sum(x => x.OrderCount),
                     OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
                     CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
