@@ -305,7 +305,7 @@ namespace api_LuanVan.Controllers
                 .Include(ofd => ofd.Dish.Region)
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
-                .Where(ofd => ofd.OrderTable.IsCancel == false &&
+                .Where(ofd => ofd.OrderTable.IsCancel != true &&
                              ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
             var cartQuery = _context.CartDetails
@@ -317,7 +317,7 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
                             cd.Cart.IsFinish == true &&
-                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ( cd.Quantity * cd.Price)));
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == cd.Cart.TotalPrice));
 
             if (startDate.HasValue)
                 orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
@@ -409,6 +409,8 @@ namespace api_LuanVan.Controllers
 
             return Ok(combinedRevenue);
         }
+
+
         // lấy thông tin xem số lượng đặt của từng loại món ăn theo khu vực 
         [HttpGet("revenue-by-category-region")]
         public async Task<ActionResult> GetRevenueByCategoryAndRegion(
@@ -567,12 +569,12 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
                             cd.Cart.IsFinish == true &&
-                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true));
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == cd.Cart.TotalPrice ));
 
             if (startDate.HasValue)
-                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.StartingTime >= startDate.Value);
+                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
             if (endDate.HasValue)
-                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.StartingTime <= endDate.Value);
+                orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate <= endDate.Value);
 
             if (startDate.HasValue)
                 cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime >= startDate.Value);
@@ -616,24 +618,25 @@ namespace api_LuanVan.Controllers
             var categoryDishCounts = new Dictionary<int?, int>();
 
             // đếm số món ăn đã bán của loại món ăn 
-            foreach (var category in orderCategoryRevenue.Concat(cartCategoryRevenue)
-                .Select(x => x.CategoryId).Distinct())
-            {
-                var orderDishIds = await orderQuery
-                    .Where(ofd => ofd.Dish.CategoryId == category)
-                    .Select(ofd => ofd.DishId)
-                    .Distinct()
-                    .ToListAsync();
+            //foreach (var category in orderCategoryRevenue.Concat(cartCategoryRevenue)
+            //    .Select(x => x.CategoryId).Distinct())
+            //{
+            //    var orderDishIds = await orderQuery
+            //        .Where(ofd => ofd.Dish.CategoryId == category)
+            //        .Select(ofd => ofd.DishId)
+            //        .Distinct()
+            //        .ToListAsync();
 
-                var cartDishIds = await cartQuery
-                    .Where(cd => cd.Dish.CategoryId == category)
-                    .Select(cd => cd.DishId)
-                    .Distinct()
-                    .ToListAsync();
+            //    var cartDishIds = await cartQuery
+            //        .Where(cd => cd.Dish.CategoryId == category)
+            //        .Select(cd => cd.DishId)
+            //        .Distinct()
+            //        .ToListAsync();
 
-                var totalDishIds = orderDishIds.Concat(cartDishIds).Distinct().Count();
-                categoryDishCounts[category] = totalDishIds;
-            }
+            //    var totalDishIds = orderDishIds.Concat(cartDishIds).Distinct().Count();
+            //    categoryDishCounts[category] = totalDishIds;
+            //}
+
             var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
                 .GroupBy(x => new { x.CategoryId, x.CategoryName })
                 .Select(g => new
@@ -673,7 +676,7 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
                             cd.Cart.IsFinish == true &&
-                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true));
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == cd.Cart.TotalPrice));
 
             if (startDate.HasValue)
                 orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
@@ -720,26 +723,6 @@ namespace api_LuanVan.Controllers
                 .ToListAsync();
 
             var categoryDishCounts = new Dictionary<int?, int>();
-
-            foreach (var category in orderCategoryRevenue.Concat(cartCategoryRevenue)
-                .Select(x => x.RegionId).Distinct())
-            {
-                var orderDishIds = await orderQuery
-                    .Where(ofd => ofd.Dish.RegionId == category)
-                    .Select(ofd => ofd.DishId)
-                    .Distinct()
-                    .ToListAsync();
-
-                var cartDishIds = await cartQuery
-                    .Where(cd => cd.Dish.RegionId == category)
-                    .Select(cd => cd.DishId)
-                    .Distinct()
-                    .ToListAsync();
-
-                var totalDishIds = orderDishIds.Concat(cartDishIds).Distinct().Count();
-                categoryDishCounts[category] = totalDishIds;
-            }
-
             var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
                 .GroupBy(x => new { x.RegionId, x.RegionName })
                 .Select(g => new
