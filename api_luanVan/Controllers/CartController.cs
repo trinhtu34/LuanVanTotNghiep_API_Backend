@@ -380,7 +380,8 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     UnitPrice = g.Key.Price,
                     TotalQuantitySold = g.Sum(x => x.Quantity ?? 0),
-                    TotalRevenue = g.Sum(x => x.Price ?? 0),
+                    // Vừa sửa đoạn này 16:33 25/07/2025
+                    TotalRevenue = g.Sum(x => (x.Price ?? 0) * (x.Quantity ?? 0)),
                     OrderCount = g.Count(),
                     Source = "Cart"
                 })
