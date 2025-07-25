@@ -20,7 +20,9 @@ namespace api_LuanVan.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetAllPaymentResultsWithFilter(
             [FromQuery] DateTime? fromDate = null,
-            [FromQuery] DateTime? toDate = null
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] int? paymentMethod = null,
+            [FromQuery] bool? filterBySuccess = null
         )
         {
             try
@@ -37,21 +39,26 @@ namespace api_LuanVan.Controllers
                     var toUtc = TimeZoneInfo.ConvertTimeToUtc(toDate.Value.AddDays(1).AddSeconds(-1), vietnamTimeZone);
                     query = query.Where(p => p.Timestamp <= toUtc);
                 }
+                if (filterBySuccess.HasValue)
+                {
+                    query = query.Where(p => p.IsSuccess == filterBySuccess.Value);
+                }   
+                if (paymentMethod.HasValue)
+                {
+                    query = query.Where(p => p.PaymentMethod.Contains(paymentMethod.ToString()));
+                }
                 var results = await query
                     .Select(pr => new DTO_Payment
                     {
                         PaymentResultId = pr.PaymentResultId,
                         OrderTableId = pr.OrderTableId,
                         CartId = pr.CartId,
-                        PaymentId = pr.PaymentId,
                         Amount = pr.Amount,
                         IsSuccess = pr.IsSuccess,
                         Description = pr.Description,
                         Timestamp = pr.Timestamp,
-                        VnpayTransactionId = pr.VnpayTransactionId,
                         PaymentMethod = pr.PaymentMethod,
                         BankCode = pr.BankCode,
-                        BankTransactionId = pr.BankTransactionId,
                         ResponseDescription = pr.ResponseDescription,
                         TransactionStatusDescription = pr.TransactionStatusDescription
                     }).ToListAsync();

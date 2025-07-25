@@ -309,6 +309,7 @@ namespace api_LuanVan.Controllers
             return CreatedAtAction(nameof(GetOrderTableByUserID), new { userid = dto.UserId }, dto);
         }
         // sửa thông tin của 1 đơn đặt bàn , nhưng THỪA
+        // api này chưa được sử dụng 
         [HttpPut("{id}")]
         public async Task<ActionResult<DTO_OrderTable>> UpdateOrderTable(long id, [FromBody] DTO_OrderTable dto)
         {
