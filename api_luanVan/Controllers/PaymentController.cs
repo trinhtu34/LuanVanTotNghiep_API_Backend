@@ -58,6 +58,7 @@ namespace api_LuanVan.Controllers
                         Description = pr.Description,
                         Timestamp = pr.Timestamp,
                         PaymentMethod = pr.PaymentMethod,
+                        BankCode = pr.BankCode,
                         ResponseDescription = pr.ResponseDescription,
                         TransactionStatusDescription = pr.TransactionStatusDescription
                     }).ToListAsync();
