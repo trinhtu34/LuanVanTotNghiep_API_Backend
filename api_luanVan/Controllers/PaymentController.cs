@@ -18,7 +18,7 @@ namespace api_LuanVan.Controllers
         }
         // api dùng để lấy ra thông tin thanh toán và thống kê doanh thu theo tuần , tháng , quý , năm 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DTO_Payment>>> GetAllPaymentResultsWithFilter(
+        public async Task<ActionResult<IEnumerable<DTO_PaymentResultInfoTotal>>> GetAllPaymentResultsWithFilter(
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
             [FromQuery] int? paymentMethod = null,
@@ -48,7 +48,7 @@ namespace api_LuanVan.Controllers
                     query = query.Where(p => p.PaymentMethod.Contains(paymentMethod.ToString()));
                 }
                 var results = await query
-                    .Select(pr => new DTO_Payment
+                    .Select(pr => new DTO_PaymentResultInfoTotal
                     {
                         PaymentResultId = pr.PaymentResultId,
                         OrderTableId = pr.OrderTableId,
@@ -58,7 +58,6 @@ namespace api_LuanVan.Controllers
                         Description = pr.Description,
                         Timestamp = pr.Timestamp,
                         PaymentMethod = pr.PaymentMethod,
-                        BankCode = pr.BankCode,
                         ResponseDescription = pr.ResponseDescription,
                         TransactionStatusDescription = pr.TransactionStatusDescription
                     }).ToListAsync();
