@@ -551,8 +551,8 @@ namespace api_LuanVan.Controllers
         // lấy thông tin doanh thu theo loại món ăn theo thời gian , ý là in ra loại món ăn và doanh thu của nó 
         [HttpGet("revenue-by-category")]
         public async Task<ActionResult> GetRevenueByCategory(
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
+    [FromQuery] DateTime? startDate = null,
+    [FromQuery] DateTime? endDate = null)
         {
             var orderQuery = _context.OrderFoodDetails
                 .Include(ofd => ofd.Dish)
@@ -569,13 +569,12 @@ namespace api_LuanVan.Controllers
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
                             cd.Cart.IsFinish == true &&
-                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == cd.Cart.TotalPrice ));
+                            cd.Cart.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == cd.Cart.TotalPrice));
 
             if (startDate.HasValue)
                 orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate >= startDate.Value);
             if (endDate.HasValue)
                 orderQuery = orderQuery.Where(ofd => ofd.OrderTable.OrderDate <= endDate.Value);
-
             if (startDate.HasValue)
                 cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime >= startDate.Value);
             if (endDate.HasValue)
@@ -615,27 +614,13 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
 
-            var categoryDishCounts = new Dictionary<int?, int>();
+            var allDishIds = await orderQuery.Select(ofd => new { ofd.DishId, ofd.Dish.CategoryId })
+                .Union(cartQuery.Select(cd => new { cd.DishId, cd.Dish.CategoryId }))
+                .ToListAsync();
 
-            // đếm số món ăn đã bán của loại món ăn 
-            //foreach (var category in orderCategoryRevenue.Concat(cartCategoryRevenue)
-            //    .Select(x => x.CategoryId).Distinct())
-            //{
-            //    var orderDishIds = await orderQuery
-            //        .Where(ofd => ofd.Dish.CategoryId == category)
-            //        .Select(ofd => ofd.DishId)
-            //        .Distinct()
-            //        .ToListAsync();
-
-            //    var cartDishIds = await cartQuery
-            //        .Where(cd => cd.Dish.CategoryId == category)
-            //        .Select(cd => cd.DishId)
-            //        .Distinct()
-            //        .ToListAsync();
-
-            //    var totalDishIds = orderDishIds.Concat(cartDishIds).Distinct().Count();
-            //    categoryDishCounts[category] = totalDishIds;
-            //}
+            var categoryDishCounts = allDishIds
+                .GroupBy(x => x.CategoryId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.DishId).Distinct().Count());
 
             var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
                 .GroupBy(x => new { x.CategoryId, x.CategoryName })
@@ -646,10 +631,7 @@ namespace api_LuanVan.Controllers
                     TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                     TotalRevenue = g.Sum(x => x.TotalRevenue),
                     DishCount = categoryDishCounts.GetValueOrDefault(g.Key.CategoryId, 0),
-                    OrderCount = g.Sum(x => x.OrderCount),
-
-                    //OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
-                    //CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
+                    OrderCount = g.Sum(x => x.OrderCount)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
                 .ToList();
@@ -661,9 +643,9 @@ namespace api_LuanVan.Controllers
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            var orderQuery = _context.OrderFoodDetails 
+            var orderQuery = _context.OrderFoodDetails
                 .Include(ofd => ofd.Dish)
-                .ThenInclude(d => d.Category)
+                .ThenInclude(d => d.Region)
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
                 .Where(ofd => ofd.OrderTable.IsCancel != true &&
@@ -671,7 +653,7 @@ namespace api_LuanVan.Controllers
 
             var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
-                .ThenInclude(d => d.Category)
+                .ThenInclude(d => d.Region)
                 .Include(cd => cd.Cart)
                 .ThenInclude(c => c.PaymentResults)
                 .Where(cd => cd.Cart.IsCancel != true &&
@@ -688,7 +670,7 @@ namespace api_LuanVan.Controllers
             if (endDate.HasValue)
                 cartQuery = cartQuery.Where(cd => cd.Cart.OrderTime <= endDate.Value);
 
-            var orderCategoryRevenue = await orderQuery
+            var orderRegionRevenue = await orderQuery
                 .GroupBy(ofd => new {
                     ofd.Dish.RegionId,
                     ofd.Dish.Region.RegionName
@@ -705,7 +687,7 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
 
-            var cartCategoryRevenue = await cartQuery
+            var cartRegionRevenue = await cartQuery
                 .GroupBy(cd => new {
                     cd.Dish.RegionId,
                     cd.Dish.Region.RegionName
@@ -721,9 +703,15 @@ namespace api_LuanVan.Controllers
                     Source = "Cart"
                 })
                 .ToListAsync();
+            var allDishIds = await orderQuery.Select(ofd => new { ofd.DishId, ofd.Dish.RegionId })
+                .Union(cartQuery.Select(cd => new { cd.DishId, cd.Dish.RegionId }))
+                .ToListAsync();
 
-            var categoryDishCounts = new Dictionary<int?, int>();
-            var combinedCategoryRevenue = orderCategoryRevenue.Concat(cartCategoryRevenue)
+            var regionDishCounts = allDishIds
+                .GroupBy(x => x.RegionId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.DishId).Distinct().Count());
+
+            var combinedRegionRevenue = orderRegionRevenue.Concat(cartRegionRevenue)
                 .GroupBy(x => new { x.RegionId, x.RegionName })
                 .Select(g => new
                 {
@@ -731,16 +719,15 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                     TotalRevenue = g.Sum(x => x.TotalRevenue),
-                    DishCount = categoryDishCounts.GetValueOrDefault(g.Key.RegionId, 0),
+                    DishCount = regionDishCounts.GetValueOrDefault(g.Key.RegionId, 0), // Lấy từ dictionary đã tính
                     OrderCount = g.Sum(x => x.OrderCount),
-
-                    //OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
-                    //CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
+                    OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
+                    CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
                 .ToList();
 
-            return Ok(combinedCategoryRevenue);
+            return Ok(combinedRegionRevenue);
         }
 
     }
