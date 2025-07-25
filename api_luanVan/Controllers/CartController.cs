@@ -308,7 +308,7 @@ namespace api_LuanVan.Controllers
                 .Where(ofd => ofd.OrderTable.IsCancel == false &&
                              ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
-            var cartQuery = _context.CartDetailss
+            var cartQuery = _context.CartDetails
                 .Include(cd => cd.Dish)
                 .ThenInclude(d => d.Category)
                 .Include(cd => cd.Dish)
