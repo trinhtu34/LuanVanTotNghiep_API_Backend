@@ -290,6 +290,7 @@ namespace api_LuanVan.Controllers
         }
 
         // api lấy doanh thu của món ăn theo khoảng thời gian và loại món ăn ------- chưa deploy fucntion này 
+        // api này đang bị lỗi trong việc tính tổng số tiền , có thể do thiếu data
         [HttpGet("dish-revenue")]
         public async Task<ActionResult> GetDishRevenue(
             [FromQuery] DateTime? startDate = null,
@@ -304,10 +305,10 @@ namespace api_LuanVan.Controllers
                 .Include(ofd => ofd.Dish.Region)
                 .Include(ofd => ofd.OrderTable)
                 .ThenInclude(ot => ot.PaymentResults)
-                .Where(ofd => ofd.OrderTable.IsCancel != true &&
+                .Where(ofd => ofd.OrderTable.IsCancel == false &&
                              ofd.OrderTable.PaymentResults.Any(pr => pr.IsSuccess == true && pr.Amount == ofd.OrderTable.TotalPrice));
 
-            var cartQuery = _context.CartDetails
+            var cartQuery = _context.CartDetailss
                 .Include(cd => cd.Dish)
                 .ThenInclude(d => d.Category)
                 .Include(cd => cd.Dish)
@@ -355,7 +356,8 @@ namespace api_LuanVan.Controllers
                     RegionName = g.Key.RegionName,
                     UnitPrice = g.Key.Price,
                     TotalQuantitySold = g.Sum(x => x.Quantity),
-                    TotalRevenue = g.Sum(x => x.Price),
+                    // Vừa sửa đoạn này 16:33 25/07/2025
+                    TotalRevenue = g.Sum(x => x.Price * x.Quantity),
                     OrderCount = g.Count(),
                     Source = "OrderTable"
                 })
