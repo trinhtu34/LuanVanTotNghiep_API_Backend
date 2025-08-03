@@ -195,8 +195,8 @@ namespace api_LuanVan.Controllers
                 CustomerName = user.CustomerName,
                 RolesId = 0,
                 PhoneNumber = user.PhoneNumber,
-                Email = "",
-                Address = "",
+                Email = user.Email ?? "",
+                Address = user.Address ?? "",
                 CreateAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)
             };
 
