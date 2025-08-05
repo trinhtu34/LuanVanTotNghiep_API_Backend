@@ -400,9 +400,6 @@ namespace api_LuanVan.Controllers
                     TotalQuantitySold = g.Sum(x => x.TotalQuantitySold),
                     TotalRevenue = g.Sum(x => x.TotalRevenue),
                     OrderCount = g.Sum(x => x.OrderCount),
-
-                    //OrderTableCount = g.Where(x => x.Source == "OrderTable").Sum(x => x.OrderCount),
-                    //CartCount = g.Where(x => x.Source == "Cart").Sum(x => x.OrderCount)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
                 .ToList();
