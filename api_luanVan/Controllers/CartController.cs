@@ -1,10 +1,8 @@
 ﻿using api_LuanVan.DataTransferObject;
 using api_LuanVan.Models;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 
 namespace api_LuanVan.Controllers
 {
@@ -34,6 +32,7 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(cartItems);
         }
+        // thêm thông tin thanh toán 
         [HttpGet("user/includepaymentandfinish/{userId}")]
         public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetCartByUserIdWithPaymentandFinish(string userId)
         {

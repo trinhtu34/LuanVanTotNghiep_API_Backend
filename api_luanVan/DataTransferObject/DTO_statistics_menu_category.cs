@@ -1,7 +1,5 @@
 ﻿namespace api_LuanVan.DataTransferObject
 {
-
-    // DTOs
     public class DishRevenueDto
     {
         public string DishId { get; set; } = null!;
