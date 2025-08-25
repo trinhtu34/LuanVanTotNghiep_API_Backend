@@ -32,7 +32,6 @@ namespace api_LuanVan.Controllers
                 return NotFound();
             return Ok(cartItems);
         }
-        // thêm thông tin thanh toán 
         [HttpGet("user/includepaymentandfinish/{userId}")]
         public async Task<ActionResult<IEnumerable<DTO_Cart_WithPaymentInfo_andIsFinish>>> GetCartByUserIdWithPaymentandFinish(string userId)
         {
