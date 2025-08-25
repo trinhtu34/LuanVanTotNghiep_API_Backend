@@ -13,9 +13,9 @@ public partial class Cart
 
     public bool? IsCancel { get; set; }
 
-    public decimal? TotalPrice { get; set; }
-
     public bool? IsFinish { get; set; }
+
+    public decimal? TotalPrice { get; set; }
 
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
