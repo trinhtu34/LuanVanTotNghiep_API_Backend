@@ -1,10 +1,8 @@
 ﻿using api_LuanVan.DataTransferObject;
 using api_LuanVan.Models;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 
 namespace api_LuanVan.Controllers
 {
