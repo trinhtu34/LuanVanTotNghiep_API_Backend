@@ -496,7 +496,7 @@ namespace api_LuanVan.Controllers
 
             var result = new
             {
-                // Thống kê theo Region và Category từ mỗi ordertable thôi -- hiện tại đang bị sai 
+                // Thống kê theo Region và Category từ mỗi ordertable thôi 
                 RegionCategoryStats = orderRegionCategoryRevenue
                     .OrderBy(x => x.RegionName)
                     .ThenByDescending(x => x.TotalRevenue)
@@ -609,7 +609,7 @@ namespace api_LuanVan.Controllers
                 })
                 .ToListAsync();
 
-            // lỗi ở đây , lấy thiếu vì món nào được khách đặt mới thống kê , không thì nó sẽ không lấy data
+            // lỗi ở đây , lấy thiếu vì món nào được khách đặt mới thống kê , không thì nó sẽ không lấy data ra 
             var dishCountByCategory = await _context.Menus
                 .Include(d => d.Category)
                 .GroupBy(d => new { d.CategoryId, d.Category.CategoryName })
